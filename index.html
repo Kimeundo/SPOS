@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GovAI Office | 行政AIワンストップ</title>
+  <style>
+    :root {
+      --bg: #f4f8ff;
+      --panel: rgba(255, 255, 255, 0.86);
+      --ink: #10213f;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --line: rgba(37, 99, 235, 0.14);
+      --shadow: 0 24px 70px rgba(30, 64, 175, 0.16);
+      --radius: 28px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 12%, rgba(6, 182, 212, 0.24), transparent 28rem),
+        radial-gradient(circle at 94% 8%, rgba(37, 99, 235, 0.22), transparent 34rem),
+        linear-gradient(180deg, #ffffff 0%, var(--bg) 48%, #eef6ff 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(18px);
+      background: rgba(255, 255, 255, 0.72);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      font-size: 1.18rem;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.28);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .nav-cta {
+      border: 0;
+      color: white;
+      background: var(--ink);
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+    }
+
+    .hero {
+      position: relative;
+      padding: 82px 0 56px;
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      align-items: center;
+      gap: 44px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--primary-dark);
+      background: rgba(255,255,255,0.75);
+      font-weight: 800;
+      box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
+    }
+
+    h1 {
+      margin: 22px 0 18px;
+      font-size: clamp(2.6rem, 6.2vw, 5.6rem);
+      line-height: 0.95;
+      letter-spacing: -0.08em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(100deg, #1e40af, #0891b2 55%, #10b981);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 1.12rem;
+      line-height: 1.85;
+      max-width: 680px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 18px;
+      padding: 16px 22px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.24);
+    }
+
+    .btn-secondary {
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 36px rgba(30, 64, 175, 0.08);
+    }
+
+    .search-panel {
+      margin-top: 34px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      max-width: 690px;
+    }
+
+    .search-panel input {
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      padding: 0 14px;
+      font: inherit;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    .icon-btn {
+      width: 52px;
+      height: 52px;
+      border: 0;
+      border-radius: 17px;
+      color: white;
+      font-size: 1.18rem;
+      cursor: pointer;
+      background: var(--primary);
+    }
+
+    .icon-btn.phone { background: var(--green); }
+
+    .dashboard {
+      position: relative;
+      min-height: 590px;
+      border: 1px solid var(--line);
+      border-radius: 36px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.92), rgba(240,249,255,0.72));
+      box-shadow: var(--shadow);
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .dashboard::before {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      right: -130px;
+      top: -130px;
+      border-radius: 50%;
+      background: rgba(6, 182, 212, 0.2);
+    }
+
+    .window-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; background: #ef4444; }
+    .dot:nth-child(2) { background: #f59e0b; }
+    .dot:nth-child(3) { background: #22c55e; }
+
+    .ai-card, .person-card, .data-card, .image-card {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.86);
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(30, 64, 175, 0.08);
+    }
+
+    .ai-card h3, .person-card h3, .data-card h3, .image-card h3 { margin: 0 0 10px; }
+
+    .ai-card textarea {
+      width: 100%;
+      min-height: 116px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      color: var(--ink);
+      font: inherit;
+      background: #f8fbff;
+      outline: none;
+    }
+
+    .form-output {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .person-card { border-left: 6px solid var(--green); }
+    .data-card { border-left: 6px solid var(--primary); }
+    .image-card { border-left: 6px solid var(--amber); }
+
+    .avatar-row { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 16px;
+      display: grid; place-items: center;
+      color: white; font-weight: 900;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+    }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .chip {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #eef6ff;
+      color: #1d4ed8;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .image-preview {
+      height: 106px;
+      border-radius: 20px;
+      background:
+        linear-gradient(135deg, rgba(37,99,235,.78), rgba(6,182,212,.55)),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.22) 0 8px, transparent 8px 16px);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .data-flow { display: grid; gap: 8px; margin-top: 12px; }
+    .flow-item { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 14px; background: #f8fbff; color: var(--muted); font-weight: 800; }
+    .flow-item strong { color: var(--ink); }
+
+    .section { padding: 54px 0; }
+    .section-title { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+    .section-title h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.3rem); letter-spacing: -0.06em; }
+    .section-title p { margin: 0; max-width: 520px; color: var(--muted); line-height: 1.8; }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature {
+      padding: 24px;
+      min-height: 230px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: 0 14px 34px rgba(30, 64, 175, 0.08);
+    }
+
+    .feature-icon { font-size: 2rem; }
+    .feature h3 { margin: 14px 0 10px; font-size: 1.22rem; }
+    .feature p { margin: 0; color: var(--muted); line-height: 1.75; }
+
+    .demo-console {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      background: white;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .demo-console select, .demo-console input, .demo-console textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 13px 14px;
+      margin: 8px 0 12px;
+      font: inherit;
+      outline: none;
+      background: #f8fbff;
+    }
+
+    .demo-console textarea { min-height: 122px; resize: vertical; }
+
+    .result-box {
+      min-height: 360px;
+      padding: 22px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #eff6ff, #ffffff);
+      border: 1px solid var(--line);
+      white-space: pre-line;
+      line-height: 1.8;
+    }
+
+    footer { padding: 44px 0 60px; color: var(--muted); text-align: center; }
+
+    @media (max-width: 930px) {
+      .hero, .demo-console { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 24px, 1180px); }
+      .hero { padding-top: 46px; }
+      .search-panel { grid-template-columns: 1fr auto; }
+      .search-panel .phone { grid-column: 2; }
+      .mini-grid, .features { grid-template-columns: 1fr; }
+      .section-title { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="page nav" aria-label="メインナビゲーション">
+      <a class="brand" href="#top" aria-label="GovAI Office ホーム">
+        <span class="brand-mark">AI</span>
+        <span>GovAI Office</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">機能</a>
+        <a href="#demo">デモ</a>
+        <a href="#data">行政データ</a>
+      </div>
+      <button class="nav-cta" type="button" onclick="scrollToDemo()">デモを試す</button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="page hero">
+      <div>
+        <span class="badge">✨ 自治体民願のための実用型AIオフィス</span>
+        <h1>探す、書く、つなぐ。<br><span class="gradient-text">行政を一つに。</span></h1>
+        <p class="lead">単なるAI質問ではありません。民願の核心である「どの担当者に、どの内容で、どの書式を提出するか」をAIが即座に整理し、各種書式の自動作成、画像生成、担当者検索、電話連携、部門別行政データ統合まで一つの画面で支援します。</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" type="button" onclick="generateDocument()">📄 書式を自動作成</button>
+          <button class="btn btn-secondary" type="button" onclick="findOfficer()">👤 担当者を探す</button>
+        </div>
+        <div class="search-panel" role="search">
+          <input id="quickSearch" aria-label="民願検索" placeholder="例：道路破損、補助金、騒音、建築許可..." />
+          <button class="icon-btn" type="button" aria-label="検索" onclick="findOfficer()">🔍</button>
+          <button class="icon-btn phone" type="button" aria-label="電話" onclick="callOfficer()">☎</button>
+        </div>
+      </div>
+
+      <div class="dashboard" aria-label="サービスプレビュー">
+        <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="ai-card">
+          <h3>AIオフィス · 書式自動作成</h3>
+          <textarea id="complaintText">自宅前の歩道ブロックが沈下し、夜間に高齢者が転倒しそうです。現場確認と補修を要請します。</textarea>
+          <button class="btn btn-primary" type="button" onclick="generateDocument()">内容だけで申請書を生成</button>
+          <div id="formOutput" class="form-output">生活安全・道路管理関連の民願書式に変換できます。</div>
+        </div>
+        <div class="mini-grid">
+          <div class="person-card">
+            <h3>担当者即時案内</h3>
+            <div class="avatar-row"><div class="avatar">道</div><div><strong id="officerName">道路管理課 佐藤</strong><br><span id="officerPhone">代表 062-120-3301</span></div></div>
+            <div class="chips"><span class="chip">現場確認</span><span class="chip">補修受付</span><span class="chip">進捗通知</span></div>
+          </div>
+          <div class="image-card">
+            <h3>画像生成</h3>
+            <div class="image-preview" id="imagePreview">広報バナー・案内図・説明画像をAI生成</div>
+          </div>
+        </div>
+        <div class="data-card" id="data">
+          <h3>部門別行政データ統合</h3>
+          <div class="data-flow">
+            <div class="flow-item"><strong>福祉課 CSV</strong><span>AI標準項目へ変換</span></div>
+            <div class="flow-item"><strong>建設課 Excel</strong><span>住所・工種を正規化</span></div>
+            <div class="flow-item"><strong>環境課 PDF</strong><span>民願分類を抽出</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page section" id="features">
+      <div class="section-title">
+        <h2>実際の民願業務に合わせた<br>6つの中核機能</h2>
+        <p>各部署の書式やデータ形式が違っても、AIが内容・目的・担当部門を判断して、行政担当者と市民の双方がすぐ使える形に整えます。</p>
+      </div>
+      <div class="features">
+        <article class="feature"><div class="feature-icon">🧠</div><h3>AIオフィス</h3><p>質問回答に留まらず、受付、分類、文案作成、要約、担当部署推薦まで行政事務の流れを支援します。</p></article>
+        <article class="feature"><div class="feature-icon">📑</div><h3>各種書式自動作成</h3><p>内容だけ入力すると、申請書、陳情書、現場確認依頼、補助金相談票などの実務書式へ変換します。</p></article>
+        <article class="feature"><div class="feature-icon">🎨</div><h3>画像生成</h3><p>広報ポスター、案内カード、現場説明図、SNS告知画像をデモ用プロンプトから即時生成します。</p></article>
+        <article class="feature"><div class="feature-icon">👥</div><h3>担当者 찾기</h3><p>민원의 핵심인「어느 담당자인가」를 키워드, 위치, 민원유형으로 찾아 전화 연결까지 안내합니다。</p></article>
+        <article class="feature"><div class="feature-icon">🔍</div><h3>検索・電話 기본導線</h3><p>돋보기 검색과 전화 버튼을 항상 노출해、市民が迷わず問い合わせ・申請・相談へ進めます。</p></article>
+        <article class="feature"><div class="feature-icon">🗂️</div><h3>行政データ統合</h3><p>部署ごとに異なるCSV、Excel、PDF、文章形式をAIが読み取り、標準分類・住所・担当課・進捗項目へ統合します。</p></article>
+      </div>
+    </section>
+
+    <section class="page section" id="demo">
+      <div class="section-title">
+        <h2>ワンクリック業務デモ</h2>
+        <p>デモのため外部AIには接続せず、入力内容を基にフロントエンドだけで完成イメージを生成します。</p>
+      </div>
+      <div class="demo-console">
+        <div>
+          <label>業務タイプ</label>
+          <select id="taskType">
+            <option>民願書式自動作成</option>
+            <option>担当者検索</option>
+            <option>画像生成プロンプト</option>
+            <option>部門別データ統合</option>
+          </select>
+          <label>民願・業務内容</label>
+          <textarea id="demoInput">駅前の不法投棄が増えており、清掃と監視案内板の設置を依頼したいです。</textarea>
+          <label>地域・部署ヒント</label>
+          <input id="areaInput" value="中央区 / 環境美化" />
+          <button class="btn btn-primary" type="button" onclick="runDemo()">生成する</button>
+        </div>
+        <output id="demoResult" class="result-box">ここにAIオフィスの生成結果が表示されます。</output>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page">GovAI Office demo · 行政DX、民願対応、AI書式作成、担当者検索を一つに。</footer>
+
+  <script>
+    const departments = [
+      { keys: ["道路", "歩道", "舗装", "街灯"], name: "道路管理課 佐藤", phone: "062-120-3301", tag: "現場確認・補修" },
+      { keys: ["ゴミ", "不法投棄", "清掃", "環境"], name: "環境美化課 田中", phone: "062-120-4412", tag: "清掃・監視案内" },
+      { keys: ["補助金", "創業", "商店", "産業"], name: "地域経済課 山本", phone: "062-120-5520", tag: "補助金相談" },
+      { keys: ["福祉", "高齢者", "障害", "介護"], name: "福祉支援課 鈴木", phone: "062-120-6615", tag: "福祉相談" }
+    ];
+
+    function matchDepartment(text) {
+      return departments.find(dep => dep.keys.some(key => text.includes(key))) || departments[0];
+    }
+
+    function generateDocument() {
+      const text = document.getElementById("complaintText").value.trim() || document.getElementById("quickSearch").value.trim();
+      const dep = matchDepartment(text);
+      document.getElementById("formOutput").textContent = `【民願受付書（案）】\n担当：${dep.name} / ${dep.tag}\n要旨：${text || "入力内容を基に民願要旨を作成します。"}\n処理案：現場確認 → 担当課配分 → 申請者へ進捗通知`;
+      document.getElementById("officerName").textContent = dep.name;
+      document.getElementById("officerPhone").textContent = `直通 ${dep.phone}`;
+    }
+
+    function findOfficer() {
+      const query = document.getElementById("quickSearch").value || document.getElementById("complaintText").value;
+      const dep = matchDepartment(query);
+      document.getElementById("officerName").textContent = dep.name;
+      document.getElementById("officerPhone").textContent = `直通 ${dep.phone}`;
+      document.getElementById("formOutput").textContent = `検索結果：${dep.name} が最適担当です。業務範囲：${dep.tag}。電話ボタンで連絡できます。`;
+    }
+
+    function callOfficer() {
+      const phone = document.getElementById("officerPhone").textContent.replace(/[^0-9-]/g, "");
+      alert(`デモ電話連携：${phone} に接続する想定です。`);
+    }
+
+    function runDemo() {
+      const type = document.getElementById("taskType").value;
+      const content = document.getElementById("demoInput").value.trim();
+      const area = document.getElementById("areaInput").value.trim();
+      const dep = matchDepartment(`${content} ${area}`);
+      const result = {
+        "民願書式自動作成": `【${type}】\n宛先：${dep.name}\n地域：${area}\n申請要旨：${content}\n必要処理：受付番号発行、現場確認、回答期限設定、結果通知\n添付推奨：現場写真、位置情報、連絡先`,
+        "担当者検索": `最適担当者：${dep.name}\n電話：${dep.phone}\n判断根拠：入力内容から「${dep.tag}」に該当\n次の行動：電話相談、オンライン受付、現場資料アップロード`,
+        "画像生成プロンプト": `生成プロンプト：日本の自治体広報スタイル、清潔な青白配色、${area}、テーマ「${content}」、市民に分かりやすい案内アイコン、A4ポスター、信頼感のある行政デザイン`,
+        "部門別データ統合": `統合結果プレビュー\n入力元：環境課 PDF / 道路課 Excel / コールセンターCSV\n標準項目：受付日、住所、民願分類、担当課、緊急度、処理期限\nAI判断：${dep.name} に一次配分、重複案件を統合、進捗ダッシュボードへ反映`
+      };
+      document.getElementById("demoResult").textContent = result[type];
+      document.getElementById("imagePreview").textContent = type === "画像生成プロンプト" ? "プロンプト生成完了" : "広報バナー・案内図・説明画像をAI生成";
+    }
+
+    function scrollToDemo() {
+      document.getElementById("demo").scrollIntoView({ behavior: "smooth" });
+    }
+
+    runDemo();
+  </script>
+</body>
+</html>
