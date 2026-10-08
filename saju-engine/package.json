@@ -1,0 +1,17 @@
+{
+  "name": "saju-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "휘연당 만세력 엔진",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test",
+    "example": "node examples/print.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "astronomy-engine": "^2.1.19",
+    "korean-lunar-calendar": "^0.3.6"
+  }
+}
