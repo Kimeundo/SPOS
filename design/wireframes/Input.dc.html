@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>생년월일시 입력</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&amp;family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2B3560}a:hover{color:#1C2340}
+input,select{font:inherit;color:#1C2340}
+</style>
+</helmet>
+<div style="width: 390px; height: 1000px; box-sizing: border-box; background: #F5F0E4; color: #1C2340; font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #161C36; color: #F5F0E4;">
+    <a href="Main.dc.html" aria-label="뒤로" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #F5F0E4;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+    </a>
+    <span style="font-size: 16px; font-weight: 600; flex-grow: 1;">내 사주 입력</span>
+    <span style="font-size: 12px; color: #E8CD8C; padding-right: 8px;">1 / 2</span>
+  </header>
+  <div style="height: 3px; background: #E2D9C4;"><div style="width: 50%; height: 3px; background: #C8A24C;"></div></div>
+
+  <main style="display: flex; flex-direction: column; gap: 18px; padding: 20px;">
+    <div style="display: flex; gap: 10px; align-items: flex-start;">
+      <img src="../assets/characters/yeon/yeon-face.webp" alt="하연" style="width: 44px; height: 44px; flex-shrink: 0;">
+      <p style="margin: 0; padding: 9px 13px; border-radius: 4px 14px 14px 14px; background: #E1EEEC; font-size: 14px; line-height: 1.6;">생년월일이랑 태어난 시간 알려줄래요? 이름은 안 적어도 돼요~</p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <label for="f-name" style="font-size: 13px; font-weight: 600;">부를 이름 <span style="font-weight: 400; color: #5B6178;">(선택)</span></label>
+      <input id="f-name" type="text" placeholder="예: 지우" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D8CDB4; border-radius: 12px; background: #FFFCF5;">
+    </div>
+
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px;">
+      <legend style="font-size: 13px; font-weight: 600; padding: 0; margin-bottom: 6px;">성별</legend>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+        <label style="height: 46px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #D8CDB4; border-radius: 12px; background: #FFFCF5; font-size: 14px;"><input type="radio" name="g" id="g-f"> 여성</label>
+        <label style="height: 46px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #D8CDB4; border-radius: 12px; background: #FFFCF5; font-size: 14px;"><input type="radio" name="g" id="g-m"> 남성</label>
+      </div>
+      <span style="font-size: 12px; color: #5B6178;">대운이 흐르는 방향(순행·역행)을 계산할 때 쓰여요.</span>
+    </fieldset>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 13px; font-weight: 600;">생년월일</span>
+      <div style="display: flex; gap: 6px;">
+        <button type="button" onClick="{{ setSolar }}" style="{{ solarStyle }}">양력</button>
+        <button type="button" onClick="{{ setLunar }}" style="{{ lunarStyle }}">음력</button>
+      </div>
+      <label for="f-date" style="position: absolute; left: -9999px;">생년월일</label>
+      <input id="f-date" type="date" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D8CDB4; border-radius: 12px; background: #FFFCF5;">
+      <sc-if value="{{ lunar }}" hint-placeholder-val="{{ false }}">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; min-height: 36px;"><input type="checkbox" id="f-leap"> 윤달이에요</label>
+      </sc-if>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <label for="f-time" style="font-size: 13px; font-weight: 600;">태어난 시각</label>
+      <sc-if value="{{ knowsTime }}" hint-placeholder-val="{{ true }}">
+        <input id="f-time" type="time" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D8CDB4; border-radius: 12px; background: #FFFCF5; width: 100%;">
+      </sc-if>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; min-height: 36px;"><input type="checkbox" id="f-notime" onChange="{{ toggleTime }}"> 시간을 몰라요 (시주 없이 삼주로 볼게요)</label>
+      <sc-if value="{{ noTime }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: #FFFCF5; border: 1px dashed #D8CDB4;">
+          <img src="../assets/characters/hwi-poses/19-scratch.webp" alt="머리를 긁는 서휘" style="width: 64px; height: 64px; flex-shrink: 0;">
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55;"><b>휘</b> · 음… 괜찮아. 시주는 빼고 나머지 여섯 글자로 볼게. 나중에 알게 되면 고쳐줘.</p>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <label for="f-place" style="font-size: 13px; font-weight: 600;">태어난 지역</label>
+      <select id="f-place" style="height: 48px; box-sizing: border-box; padding: 0 12px; border: 1px solid #D8CDB4; border-radius: 12px; background: #FFFCF5;">
+        <option>서울</option><option>부산</option><option>대구</option><option>광주</option><option>제주</option><option>해외</option>
+      </select>
+      <span style="font-size: 12px; color: #5B6178;">실제 태양 시간(진태양시)으로 보정할 때 쓰여요. 보정 여부는 설정에서 바꿀 수 있어요.</span>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: flex-start;">
+      <img src="../assets/characters/hwi-poses/06-magnify.webp" alt="돋보기를 든 서휘" style="width: 56px; height: 56px; flex-shrink: 0;">
+      <p style="margin: 0; padding: 9px 13px; border-radius: 4px 14px 14px 14px; background: #E6E8F1; font-size: 14px; line-height: 1.6;">시간은 분 단위까지 정확할수록 좋아요. 출생증명서에 적혀 있어요.</p>
+    </div>
+
+    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.5;"><input type="checkbox" id="f-consent" style="margin-top: 3px;"> <span>[필수] 생년월일시 등 개인정보 수집·이용에 동의합니다. <a href="#">내용 보기</a></span></label>
+
+    <a href="Loading.dc.html" style="display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 14px; background: #D4AF5A; color: #161C36; text-decoration: none; font-size: 16.5px; font-weight: 700;">내 일간 카드 받기</a>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lunar: false, knowsTime: true };
+  }
+  renderVals() {
+    const on = 'height: 40px; padding: 0 18px; border-radius: 99px; border: 1px solid #232B4D; background: #232B4D; color: #F5F0E4; font-size: 14px; cursor: pointer;';
+    const off = 'height: 40px; padding: 0 18px; border-radius: 99px; border: 1px solid #D8CDB4; background: #FFFCF5; color: #1C2340; font-size: 14px; cursor: pointer;';
+    return {
+      lunar: this.state.lunar,
+      knowsTime: this.state.knowsTime,
+      noTime: !this.state.knowsTime,
+      solarStyle: this.state.lunar ? off : on,
+      lunarStyle: this.state.lunar ? on : off,
+      setSolar: () => this.setState({ lunar: false }),
+      setLunar: () => this.setState({ lunar: true }),
+      toggleTime: () => this.setState({ knowsTime: !this.state.knowsTime })
+    };
+  }
+}
+</script>
+</body>
+</html>

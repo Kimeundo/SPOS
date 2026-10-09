@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>플랜 선택</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&amp;family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2B3560}a:hover{color:#1C2340}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1040px; box-sizing: border-box; background: #F5F0E4; color: #1C2340; font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+  <section style="position: relative; height: 210px; overflow: hidden; background-color: #161C36; background-image: radial-gradient(circle at 16% 30%, rgba(232, 205, 140, 0.9) 0 1.2px, transparent 2px), radial-gradient(circle at 46% 16%, rgba(232, 205, 140, 0.7) 0 1px, transparent 2px), radial-gradient(ellipse at 30% 100%, #2C3A6B 0%, #161C36 70%); color: #F5F0E4;">
+    <a href="Reading.dc.html" aria-label="닫기" style="position: absolute; left: 12px; top: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #F5F0E4; z-index: 1;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </a>
+    <div style="position: absolute; left: 22px; top: 70px; width: 190px; display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 12px; letter-spacing: 0.14em; color: #E8CD8C;">단골손님이 되어줄래요?</span>
+      <p style="margin: 0; padding: 10px 13px; border-radius: 14px 14px 4px 14px; background: #E1EEEC; color: #1C2340; font-size: 14px; line-height: 1.6;">더 얘기해주고 싶은데… 단골이 되면 매달 이렇게 봐줄게요.</p>
+    </div>
+    <img src="../assets/characters/yeon/yeon-moon.webp" alt="부채를 든 하연" style="position: absolute; right: 8px; top: 24px; width: 170px; height: 170px; filter: drop-shadow(0 0 20px rgba(232, 205, 140, 0.45));">
+  </section>
+
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px;">
+      <legend style="font-size: 13px; font-weight: 600; margin-bottom: 8px; padding: 0;">플랜을 골라주세요</legend>
+      <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
+        <button type="button" onClick="{{ p.pick }}" aria-pressed="{{ p.pressed }}" style="{{ p.boxStyle }}">
+          <span style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+            <span style="font-size: 15px; font-weight: 600;">{{ p.name }}</span>
+            <span style="font-family: 'Song Myung', serif; font-size: 21px;">{{ p.price }}</span>
+          </span>
+          <span style="font-size: 13px; color: #5B6178; text-align: left; line-height: 1.5;">{{ p.desc }}</span>
+          <sc-if value="{{ p.hasBadge }}" hint-placeholder-val="{{ false }}">
+            <span style="align-self: flex-start; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: #D4AF5A; color: #161C36;">{{ p.badge }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </fieldset>
+
+    <sc-if value="{{ hasPick }}" hint-placeholder-val="{{ false }}">
+      <div style="border-radius: 12px; background: #F3E3BC; color: #5A3E0B; padding: 12px 14px; font-size: 13px; line-height: 1.6;">{{ terms }}</div>
+    </sc-if>
+    <sc-if value="{{ noPick }}" hint-placeholder-val="{{ true }}">
+      <div style="border-radius: 12px; border: 1px dashed #D8CDB4; padding: 12px 14px; font-size: 13px; color: #5B6178;">플랜을 고르면 결제 금액과 자동결제 조건이 여기에 표시돼요.</div>
+    </sc-if>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <button type="button" onClick="{{ pay }}" style="{{ payStyle }}">{{ payLabel }}</button>
+      <a href="Reading.dc.html" style="display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 14px; border: 1px solid #232B4D; color: #232B4D; text-decoration: none; font-size: 15px;">다음에 올게요</a>
+    </div>
+
+    <p style="margin: 0; font-size: 12px; color: #5B6178; line-height: 1.6;">구독은 마이 &gt; 구독 관리에서 언제든 해지할 수 있어요. 해지해도 결제한 기간이 끝날 때까지 이용할 수 있어요. 결제 전 <a href="#">이용약관</a>과 <a href="#">환불 규정</a>을 확인해주세요.</p>
+  </main>
+
+  <sc-if value="{{ paid }}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 5; background-color: #161C36; background-image: radial-gradient(circle at 20% 20%, rgba(232, 205, 140, 0.9) 0 1.5px, transparent 2.5px), radial-gradient(circle at 80% 30%, rgba(232, 205, 140, 0.8) 0 1.2px, transparent 2px), radial-gradient(circle at 60% 12%, rgba(232, 205, 140, 0.7) 0 1px, transparent 2px), radial-gradient(ellipse at 50% 40%, #33427A 0%, #161C36 70%); color: #F5F0E4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; text-align: center;">
+      <div style="position: relative; width: 300px; height: 230px;">
+        <img src="../assets/characters/hwi-poses/14-flag.webp" alt="깃발을 흔드는 서휘" style="position: absolute; left: 0; top: 10px; width: 190px; height: 190px; filter: drop-shadow(0 0 26px rgba(232, 205, 140, 0.6));">
+        <img src="../assets/characters/yeon/yeon-moon.webp" alt="하연" style="position: absolute; right: 0; top: 40px; width: 150px; height: 150px; filter: drop-shadow(0 0 20px rgba(232, 205, 140, 0.5));">
+      </div>
+      <span style="font-size: 12px; letter-spacing: 0.18em; color: #E8CD8C;">단골손님 등록 완료</span>
+      <h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: 30px; line-height: 1.3;">어서 와,<br>이제 우리 단골이야</h2>
+      <p style="margin: 0; font-size: 14px; color: #C9CCDA; line-height: 1.6;">{{ paidNote }}</p>
+      <div style="display: flex; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 14px; background: rgba(255, 252, 245, 0.08); border: 1px solid #4E5888;">
+        <img src="../assets/characters/hwi-poses/17-calendar.webp" alt="" style="width: 48px; height: 48px;">
+        <span style="font-size: 13px; text-align: left;">첫 월간 리포트는 다음 달 1일에 도착해요</span>
+      </div>
+      <a href="Reading.dc.html" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 56px; border-radius: 14px; background: #D4AF5A; color: #161C36; text-decoration: none; font-size: 16.5px; font-weight: 700;">종합풀이 이어서 듣기</a>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1040}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { picked: null, paid: false };
+  }
+  renderVals() {
+    const list = [
+      { id: 'once', name: '평생 종합풀이 1회', price: '19,900원', desc: '성격, 적성, 재물, 연애, 대운 흐름. 결과 영구 보관.', badge: '',
+        pay: '19,900원 결제하기', terms: '1회 결제 19,900원. 자동결제 없음.' },
+      { id: 'month', name: '월 구독 「단골손님」', price: '월 7,900원', desc: '이 풀이 포함. 월간 리포트, 1:1 질문 월 5회, 궁합 무제한.', badge: '첫 달 1,900원',
+        pay: '첫 달 1,900원 결제하기', terms: '오늘 1,900원 결제. [다음 결제일]부터 매월 7,900원이 자동결제됩니다. 결제 7일 전에 알림을 보내드려요.' },
+      { id: 'year', name: '연 구독', price: '연 69,000원', desc: '월 구독 혜택 전부 + 신년운세. 월 환산 약 5,750원.', badge: '',
+        pay: '69,000원 결제하기', terms: '오늘 69,000원 결제. 1년 뒤 같은 날 69,000원이 자동결제됩니다. 갱신 전에 알림을 보내드려요.' }
+    ];
+    const picked = this.state.picked;
+    const base = 'display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 14px 16px; border-radius: 14px; background: #FFFCF5; font: inherit; color: #1C2340; cursor: pointer; text-align: left; box-sizing: border-box; ';
+    const sel = list.find((x) => x.id === picked);
+    return {
+      plans: list.map((x) => ({
+        name: x.name, price: x.price, desc: x.desc, badge: x.badge, hasBadge: x.badge !== '',
+        pressed: String(x.id === picked),
+        boxStyle: base + (x.id === picked ? 'border: 2px solid #C8A24C; box-shadow: 0 4px 14px rgba(184, 145, 58, 0.25);' : 'border: 1px solid #D8CDB4;'),
+        pick: () => this.setState({ picked: x.id })
+      })),
+      hasPick: !!sel,
+      paid: this.state.paid,
+      paidNote: sel ? sel.terms : '',
+      pay: () => { if (sel) this.setState({ paid: true }); },
+      noPick: !sel,
+      terms: sel ? sel.terms : '',
+      payLabel: sel ? sel.pay : '플랜을 골라주세요',
+      payStyle: 'height: 56px; border-radius: 14px; border: 0; font: inherit; font-size: 16.5px; font-weight: 700; ' +
+        (sel ? 'background: #D4AF5A; color: #161C36; cursor: pointer;' : 'background: #DDD5C2; color: #5B6178; cursor: not-allowed;')
+    };
+  }
+}
+</script>
+</body>
+</html>

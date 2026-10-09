@@ -1,0 +1,451 @@
+<title>휘연당 캐릭터 설정서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 기획서와 같은 장부 체계. 좌측 목차 + 본문, 인물별 섹션은 청묵/연지 색으로 구분 */
+:root{
+  --paper:#F3F4F1; --sheet:#FBFBF9; --ink:#1F2430; --ink-soft:#5A6070; --line:#D9DCD6;
+  --hwi:#34466B; --hwi-tint:#E3E8F2; --yeon:#B54A6E; --yeon-tint:#F6E4EA; --seal:#B8322A;
+  --metal:#7D838E; --water:#2B3F5C;
+  --warn-bg:#FBF1DC; --warn-fg:#7A5410;
+  --f-display:"Song Myung","Nanum Myeongjo",serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#15171C; --sheet:#1C1F26; --ink:#E7E8EC; --ink-soft:#A3A8B5; --line:#2E323C;
+    --hwi:#9DB2DA; --hwi-tint:#232C40; --yeon:#E79AB5; --yeon-tint:#3A2530; --seal:#E0645A;
+    --metal:#B4B9C3; --water:#7FA3D6; --warn-bg:#3A2F17; --warn-fg:#F1CF86; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15171C; --sheet:#1C1F26; --ink:#E7E8EC; --ink-soft:#A3A8B5; --line:#2E323C;
+  --hwi:#9DB2DA; --hwi-tint:#232C40; --yeon:#E79AB5; --yeon-tint:#3A2530; --seal:#E0645A;
+  --metal:#B4B9C3; --water:#7FA3D6; --warn-bg:#3A2F17; --warn-fg:#F1CF86; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.7;word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 80px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px}.toc{display:none}}
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;font-size:13.5px}
+.toc p{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.toc a{color:var(--ink-soft);text-decoration:none;display:block;padding:3px 0 3px 10px;border-left:2px solid var(--line)}
+.toc a:hover,.toc a:focus-visible{color:var(--ink);border-left-color:var(--seal);outline:none}
+main{min-width:0;display:grid;gap:64px}
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.25}
+h3{font-size:16.5px;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--seal)}
+.sec{display:grid;gap:20px;scroll-margin-top:24px}
+.sec-head{display:grid;gap:6px;max-width:68ch}
+.lead{color:var(--ink-soft);max-width:65ch}
+.note{font-size:13px;color:var(--ink-soft)}
+.verify{font-family:var(--f-mono);font-size:10.5px;color:var(--warn-fg);background:var(--warn-bg);padding:1px 6px;border-radius:4px;white-space:nowrap}
+
+.hero{display:grid;gap:14px;border-bottom:1px solid var(--line);padding-bottom:36px}
+.hero h1{font-family:var(--f-display);font-weight:400;font-size:clamp(40px,7vw,64px);line-height:1.1}
+.hero .tag{font-size:18px;max-width:46ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--f-mono);font-size:12px;color:var(--ink-soft)}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:10px}
+@media (max-width:560px){.duo{grid-template-columns:minmax(0,1fr)}}
+.duo-card{border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.duo-card.h{background:var(--hwi-tint)}.duo-card.y{background:var(--yeon-tint)}
+.seal{width:64px;height:64px;border:2.5px solid currentColor;font-family:var(--f-display);font-size:34px;display:grid;place-items:center;border-radius:6px}
+.duo-card.h .seal{color:var(--hwi);transform:rotate(-4deg)}.duo-card.y .seal{color:var(--yeon);transform:rotate(3deg)}
+.duo-card b{font-family:var(--f-display);font-weight:400;font-size:24px;display:block;line-height:1.2}
+.duo-card span{font-size:13.5px;color:var(--ink-soft)}
+
+.world{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px}
+@media (max-width:760px){.world{grid-template-columns:minmax(0,1fr)}}
+.prose{display:grid;gap:12px;max-width:65ch}
+.facts{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;align-self:start;margin:0}
+.facts div{background:var(--sheet);padding:12px 16px;display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;font-size:14px}
+.facts dt{color:var(--ink-soft)}
+.facts dd{margin:0}
+
+/* profile */
+.profile{display:grid;gap:22px;padding:28px;border-radius:16px;background:var(--sheet);border:1px solid var(--line)}
+.profile.h{border-top:4px solid var(--hwi)}.profile.y{border-top:4px solid var(--yeon)}
+.p-head{display:flex;flex-wrap:wrap;align-items:center;gap:18px}
+.p-head .seal{width:76px;height:76px;font-size:40px}
+.profile.h .p-head .seal{color:var(--hwi)}.profile.y .p-head .seal{color:var(--yeon)}
+.p-name{font-family:var(--f-display);font-size:38px;line-height:1.1}
+.p-name small{font-size:18px;color:var(--ink-soft);margin-left:8px}
+.p-sub{font-size:14px;font-weight:600}
+.profile.h .p-sub{color:var(--hwi)}.profile.y .p-sub{color:var(--yeon)}
+.p-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.block{display:grid;gap:8px;align-content:start;min-width:0}
+.block h3{font-size:13px;font-family:var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:500}
+.kv{display:grid;grid-template-columns:82px minmax(0,1fr);gap:6px 12px;font-size:14px;margin:0}
+.kv dt{color:var(--ink-soft)}
+.kv dd{margin:0}
+.list{margin:0;padding-left:18px;font-size:14px;display:grid;gap:4px}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:flex;align-items:center;gap:8px;font-size:12.5px;font-family:var(--f-mono);color:var(--ink-soft)}
+.sw i{width:22px;height:22px;border-radius:5px;border:1px solid var(--line);display:block}
+.ilgan{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:14px 16px;border-radius:10px;border:1px dashed var(--line)}
+.ilgan .gz{font-family:var(--f-display);font-size:40px;line-height:1;width:58px;height:58px;display:grid;place-items:center;border:1.5px solid currentColor;border-radius:8px}
+.ilgan .gz.m{color:var(--metal)}.ilgan .gz.wa{color:var(--water)}
+.ilgan p{font-size:14px}
+.lines{display:grid;gap:8px}
+.line{font-family:var(--f-display);font-size:17px;line-height:1.5;padding:8px 14px;border-radius:4px 12px 12px 12px}
+.profile.h .line{background:var(--hwi-tint)}.profile.y .line{background:var(--yeon-tint)}
+.line small{display:block;font-family:var(--f-body);font-size:12px;color:var(--ink-soft);margin-bottom:2px}
+
+/* relation */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;background:var(--paper)}
+tr:last-child td{border-bottom:0}
+.h-c{color:var(--hwi);font-weight:600}.y-c{color:var(--yeon);font-weight:600}
+
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--line)}
+.step{background:var(--sheet);padding:18px;display:grid;gap:8px;align-content:start;margin-right:1px}
+.step .lv{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:var(--seal)}
+.step p{font-size:14px}
+.step .eg{font-size:13.5px;padding:8px 10px;border-radius:8px;background:var(--paper)}
+
+.sheet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--sheet)}
+.chip.h{border-color:var(--hwi);color:var(--hwi)}.chip.y{border-color:var(--yeon);color:var(--yeon)}
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.rule-box{padding:18px 20px;border-radius:12px;display:grid;gap:10px;align-content:start;background:var(--sheet);border:1px solid var(--line)}
+.rule-box.no{border-color:var(--seal)}
+.rule-box.no h3{color:var(--seal)}
+.rule-box ul{margin:0;padding-left:18px;font-size:14px;display:grid;gap:5px}
+
+.hooks{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.hooks li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:14px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.hooks li:last-child{border-bottom:0}
+.hooks b{font-family:var(--f-mono);font-size:12px;color:var(--seal);font-weight:500;padding-top:2px}
+.hooks span{color:var(--ink-soft);display:block;font-size:13.5px;margin-top:2px}
+@media (max-width:520px){.hooks li{grid-template-columns:minmax(0,1fr);gap:4px}}
+
+footer{border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:var(--ink-soft)}
+@media (prefers-reduced-motion:no-preference){.toc a{transition:color .15s,border-color .15s}}
+</style>
+
+<div class="wrap">
+  <nav class="toc" aria-label="목차">
+    <p>목차</p>
+    <ol>
+      <li><a href="#world">세계관</a></li>
+      <li><a href="#hwi">서휘</a></li>
+      <li><a href="#yeon">하연</a></li>
+      <li><a href="#relation">두 사람의 관계</a></li>
+      <li><a href="#intimacy">손님 친밀도</a></li>
+      <li><a href="#sheet">표정·포즈 발주</a></li>
+      <li><a href="#rules">운영 규칙</a></li>
+      <li><a href="#hooks">스토리 떡밥</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <p class="eyebrow">휘연당 · 문서 2 / 3</p>
+      <h1>캐릭터 설정서</h1>
+      <p class="tag">풀이 문장, 일러스트, 스토리 연재가 모두 이 문서의 설정을 기준으로 삼는다.</p>
+      <div class="meta"><span>초안 v0.1</span><span>2026-10-08</span><span>다음 문서: 풀이 톤 가이드</span></div>
+      <div class="duo">
+        <div class="duo-card h"><div class="seal">暉</div><div><b>서휘</b><span>설정 일간 경금(庚金) · 재물·직업·연간 운세</span></div></div>
+        <div class="duo-card y"><div class="seal">蓮</div><div><b>하연</b><span>설정 일간 계수(癸水) · 연애·궁합·관계</span></div></div>
+      </div>
+    </header>
+
+    <section class="sec" id="world">
+      <div class="sec-head">
+        <p class="eyebrow">세계관</p>
+        <h2>골목 끝 찻집 겸 철학관, 휘연당</h2>
+      </div>
+      <div class="world">
+        <div class="prose">
+          <p>서울 서촌 골목 끝, 2층짜리 한옥을 고친 찻집 겸 사주 상담소. 원래 이름은 「연당(蓮堂)」이었다. 하연의 할머니 <b>하 선생</b>이 40년 동안 차를 내리며 사주를 봐주던 곳이다.</p>
+          <p>할머니가 돌아가신 뒤 손녀 하연이 가게를 물려받았다. 할머니의 마지막 제자였던 서휘가 합류하면서 두 사람의 이름을 한 글자씩 붙여 「휘연당」으로 다시 문을 열었다.</p>
+          <p>손님은 웹사이트로 찾아오지만, 화면 속에서는 언제나 이 찻집 안이다. 낮에는 휘가 계산대 옆 책상에서 만세력을 펼치고, 연은 찻물을 올리며 손님을 맞는다.</p>
+        </div>
+        <dl class="facts">
+          <div><dt>장소</dt><dd>서촌 골목 한옥 2층 (가상의 공간)</dd></div>
+          <div><dt>1층</dt><dd>찻집. 연의 상담 공간</dd></div>
+          <div><dt>2층</dt><dd>서재. 휘의 계산 책상과 할머니의 옛 장부</dd></div>
+          <div><dt>영업 시간</dt><dd>설정상 오전 11시 ~ 밤 11시. 자시(23시) 전에 문을 닫는다</dd></div>
+          <div><dt>마스코트</dt><dd>가게 고양이 「입춘」. 입춘날 가게 앞에서 발견됨</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="sec" id="hwi">
+      <div class="sec-head">
+        <p class="eyebrow">인물 1</p>
+        <h2>서휘</h2>
+      </div>
+      <article class="profile h">
+        <div class="p-head">
+          <div class="seal">暉</div>
+          <div><div class="p-name">서휘<small>徐暉</small></div><div class="p-sub">계산과 근거 담당 · 재물 · 직업 · 커리어 · 신년운세</div></div>
+        </div>
+        <div class="ilgan">
+          <div class="gz m">庚</div>
+          <p><b>설정 일간: 경금(庚金), 양의 금.</b> 단단한 쇠나 원석에 비유된다. 결단력과 의리, 직설적인 성향으로 해석하는 경우가 많다. 이름 휘(暉)는 햇빛이라는 뜻이다. 명리에는 경금이 불(정화, 丁火)을 만나야 쓸모 있는 그릇이 된다는 해석이 있는데, 할머니가 이 해석을 빌려 "빛을 받아야 빛나는 쇠"라는 뜻으로 지어준 이름이라는 설정이다.</p>
+        </div>
+        <div class="p-grid">
+          <div class="block">
+            <h3>기본 정보</h3>
+            <dl class="kv">
+              <dt>외견 나이</dt><dd>29세</dd>
+              <dt>키</dt><dd>183cm</dd>
+              <dt>전직</dt><dd>증권사 퀀트 애널리스트</dd>
+              <dt>담당 상품</dt><dd>신년운세, 이직·창업 타이밍, 종합풀이의 재물·직업 파트</dd>
+              <dt>손님 호칭</dt><dd>손님 → 단골이 되면 이름</dd>
+            </dl>
+          </div>
+          <div class="block">
+            <h3>외형</h3>
+            <ul class="list">
+              <li>가르마를 탄 짧은 흑발, 날카로운 눈매, 은테 안경</li>
+              <li>회청색 개량한복 셔츠, 검은 슬랙스. 소매는 늘 한 번 걷어 올림</li>
+              <li>왼손목에 낡은 가죽끈 아날로그 시계 (누구 것인지는 떡밥)</li>
+              <li>소품: 검은 만년필, 모서리가 닳은 만세력 책</li>
+            </ul>
+          </div>
+          <div class="block">
+            <h3>캐릭터 컬러</h3>
+            <div class="swatches">
+              <span class="sw"><i style="background:#34466B"></i>청묵 #34466B</span>
+              <span class="sw"><i style="background:#A9B0BC"></i>은회 #A9B0BC</span>
+              <span class="sw"><i style="background:#1F2430"></i>먹 #1F2430</span>
+            </div>
+          </div>
+          <div class="block">
+            <h3>성격</h3>
+            <dl class="kv">
+              <dt>겉</dt><dd>무뚝뚝하고 효율을 따진다. 결론부터 말한다</dd>
+              <dt>속</dt><dd>책임감이 강하다. 마음에 걸린 손님의 원국은 밤에 다시 계산해본다</dd>
+              <dt>장점</dt><dd>정확하다. 애매한 말로 넘어가지 않는다</dd>
+              <dt>약점</dt><dd>감정 표현이 서툴다. 위로하려다 말이 짧아진다</dd>
+              <dt>반전</dt><dd>단것을 좋아하는데 숨긴다. 서랍에 양갱이 있다</dd>
+            </dl>
+          </div>
+          <div class="block">
+            <h3>좋아하는 것 / 싫어하는 것</h3>
+            <ul class="list">
+              <li><b>좋아함</b>: 정확한 출생 시각, 오래된 장부, 연이 내린 보이차, 양갱</li>
+              <li><b>싫어함</b>: "대충 새벽쯤이요" 같은 출생 시각, 겁부터 주는 점술가, 시끄러운 알림음</li>
+            </ul>
+          </div>
+          <div class="block">
+            <h3>배경</h3>
+            <p style="font-size:14px">증권사에서 수익률 모델을 만들었다. 숫자로는 설명되지 않는 사람들의 선택에 지쳐 회사를 그만두고, 우연히 연당에 들렀다가 하 선생에게 사주를 배우기 시작했다. 할머니가 받아준 마지막 제자다. 계산은 누구보다 정확하지만, "사람을 읽는 건 아직 멀었다"는 말을 할머니에게서 자주 들었다.</p>
+          </div>
+        </div>
+        <div class="block">
+          <h3>대표 대사</h3>
+          <div class="lines">
+            <p class="line"><small>첫인사</small>어서 와요. 태어난 시간, 정확히 알아요? 그게 제일 중요해서.</p>
+            <p class="line"><small>근거 설명</small>재성은 충분해. 문제는 들어오는 게 아니라 새는 구멍이지.</p>
+            <p class="line"><small>위로 (서툰 버전)</small>…올해가 힘든 건 네 탓 아니야. 운의 계절이 그래. 버티면 돼.</p>
+            <p class="line"><small>연에게</small>하연, 그건 근거가 없잖아. …근데 맞는 말이긴 해.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="sec" id="yeon">
+      <div class="sec-head">
+        <p class="eyebrow">인물 2</p>
+        <h2>하연</h2>
+      </div>
+      <article class="profile y">
+        <div class="p-head">
+          <div class="seal">蓮</div>
+          <div><div class="p-name">하연<small>河蓮</small></div><div class="p-sub">공감과 번역 담당 · 연애 · 궁합 · 재회 · 인간관계</div></div>
+        </div>
+        <div class="ilgan">
+          <div class="gz wa">癸</div>
+          <p><b>설정 일간: 계수(癸水), 음의 수.</b> 비, 이슬, 안개처럼 스며드는 물에 비유된다. 섬세함, 직관, 공감 능력으로 해석하는 경우가 많다. 연꽃(蓮)이 물에서 피어나는 것과 맞춘 설정이다. 오행으로는 휘의 금(金)이 연의 수(水)를 낳는 <b>금생수(金生水)</b> 상생 관계다. 계산하는 휘가 근거를 대면, 연이 그것을 사람의 말로 풀어낸다는 두 사람의 역할과 겹친다.</p>
+        </div>
+        <div class="p-grid">
+          <div class="block">
+            <h3>기본 정보</h3>
+            <dl class="kv">
+              <dt>외견 나이</dt><dd>27세</dd>
+              <dt>키</dt><dd>165cm</dd>
+              <dt>전공</dt><dd>문예창작. 손님 이야기를 장면처럼 풀어내는 재주</dd>
+              <dt>담당 상품</dt><dd>연애운·궁합, 재회 가능성, 오늘의 운세, 종합풀이의 연애·관계 파트</dd>
+              <dt>손님 호칭</dt><dd>○○님 → 단골이 되면 이름, 반말</dd>
+            </dl>
+          </div>
+          <div class="block">
+            <h3>외형</h3>
+            <ul class="list">
+              <li>긴 흑갈색 머리를 은비녀로 반만 묶음, 둥근 눈매, 웃을 때 보조개</li>
+              <li>연분홍 개량 저고리에 짙은 쪽빛 치마</li>
+              <li>연꽃 모양 작은 귀걸이</li>
+              <li>소품: 쥘부채, 찻주전자, 할머니에게 물려받은 다기</li>
+            </ul>
+          </div>
+          <div class="block">
+            <h3>캐릭터 컬러</h3>
+            <div class="swatches">
+              <span class="sw"><i style="background:#B54A6E"></i>연지 #B54A6E</span>
+              <span class="sw"><i style="background:#F2C9D6"></i>연분홍 #F2C9D6</span>
+              <span class="sw"><i style="background:#2B3F5C"></i>쪽빛 #2B3F5C</span>
+            </div>
+          </div>
+          <div class="block">
+            <h3>성격</h3>
+            <dl class="kv">
+              <dt>겉</dt><dd>다정하고 말이 많다. 장난을 잘 친다. 휘를 놀리는 담당</dd>
+              <dt>속</dt><dd>관찰력이 예리하다. 손님이 숨기는 말을 잘 알아챈다. 자기 얘기는 잘 안 한다</dd>
+              <dt>장점</dt><dd>어려운 말을 손님의 생활 장면으로 바꿔준다</dd>
+              <dt>약점</dt><dd>자기 일에는 결정을 잘 못 내린다</dd>
+              <dt>반전</dt><dd>매운 음식을 전혀 못 먹는다. 휘가 그걸로 놀린다</dd>
+            </dl>
+          </div>
+          <div class="block">
+            <h3>좋아하는 것 / 싫어하는 것</h3>
+            <ul class="list">
+              <li><b>좋아함</b>: 차 블렌딩, 손님의 연애 이야기, 비 오는 날, 휘 놀리기</li>
+              <li><b>싫어함</b>: "너는 원래 그래" 같은 단정, 숫자만 빼곡한 표, 매운 떡볶이</li>
+            </ul>
+          </div>
+          <div class="block">
+            <h3>배경</h3>
+            <p style="font-size:14px">어릴 때부터 할머니 옆에서 찻잔을 나르며 손님들의 이야기를 들었다. 사주 계산은 휘보다 느리지만, 할머니가 "사람은 너가 더 잘 읽는다"고 말한 유일한 사람이다. 할머니가 돌아가신 뒤 가게를 접으려다가, 휘가 찾아와 함께 다시 열자고 해서 마음을 바꿨다.</p>
+          </div>
+        </div>
+        <div class="block">
+          <h3>대표 대사</h3>
+          <div class="lines">
+            <p class="line"><small>첫인사</small>어서 오세요~ 차부터 한 잔 하실래요? 오늘은 유자차가 맛있어요.</p>
+            <p class="line"><small>공감</small>그 사람이 연락을 안 하는 게 서운했구나. 그 마음 당연한 거예요.</p>
+            <p class="line"><small>장난</small>어머, 도화가 두 개나? 올해 좀 바쁘겠다~</p>
+            <p class="line"><small>휘에게</small>서 선생님, 그렇게 말하면 손님 운다니까? 내가 다시 말해줄게.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="sec" id="relation">
+      <div class="sec-head">
+        <p class="eyebrow">두 사람의 관계</p>
+        <h2>동업자이자 서로의 반대편</h2>
+        <p class="lead">두 사람은 동업자다. 서로 존중하면서 티격태격한다. <b>연애 관계는 확정하지 않는다.</b> 확정하는 순간 팬의 해석 여지가 사라지고, 한쪽 캐릭터를 좋아하는 팬이 이탈할 수 있다. 서로를 아끼는 장면은 넣되 고백이나 교제 설정은 넣지 않는다.</p>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>상황</th><th><span class="h-c">휘</span> → 연</th><th><span class="y-c">연</span> → 휘</th></tr></thead>
+          <tbody>
+            <tr><td>평소 호칭</td><td>"하연" (풀네임)</td><td>"휘야"</td></tr>
+            <tr><td>놀릴 때</td><td>"매운 거 못 먹는 사람"</td><td>"서 선생님~" (일부러 존칭)</td></tr>
+            <tr><td>진지할 때</td><td>"연아"</td><td>"서휘" (풀네임)</td></tr>
+            <tr><td>의견이 갈릴 때</td><td>근거를 든다</td><td>손님의 마음을 든다</td></tr>
+            <tr><td>결국에는</td><td>연의 말이 맞다고 짧게 인정한다</td><td>휘의 계산을 믿는다고 말한다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">반복 구조: 휘가 근거를 대고, 연이 그걸 손님의 말로 풀고, 둘 중 하나가 상대의 말을 인정하며 끝난다. 어느 한쪽이 늘 이기지 않도록 승패 비율을 맞춘다.</p>
+    </section>
+
+    <section class="sec" id="intimacy">
+      <div class="sec-head">
+        <p class="eyebrow">손님 친밀도</p>
+        <h2>방문할수록 말투가 가까워진다</h2>
+        <p class="lead">캐릭터가 손님을 대하는 말투를 단계별로 바꾼다. 다시 찾아올 이유를 만드는 장치이고, 구독 혜택과 연결된다.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="lv">1단계 · 손님</span><h3>첫 방문 ~ 가입 전</h3><p>두 사람 모두 존댓말. 휘는 짧은 존댓말, 연은 부드러운 존댓말.</p><p class="eg">휘: "태어난 시간 정확해요?"<br>연: "어서 오세요~"</p></div>
+        <div class="step"><span class="lv">2단계 · 단골</span><h3>가입 후 방문 누적</h3><p>반말이 섞이기 시작한다. 연이 먼저 말을 놓는다.</p><p class="eg">연: "또 왔네? 오늘은 무슨 일이야~"<br>휘: "…왔어요?"</p></div>
+        <div class="step"><span class="lv">3단계 · 식구</span><h3>구독 손님</h3><p>둘 다 이름을 부르고 반말한다. 생일, 지난번에 물어본 고민을 기억한다.</p><p class="eg">휘: "지난달 면접 얘기, 결과 나왔어?"</p></div>
+      </div>
+      <p class="note">단계 기준(방문 횟수 등)은 지표를 보고 정한다. 설정 화면에 「처음부터 반말로 대화하기」 옵션을 둬서 친밀도 단계와 상관없이 고를 수 있게 한다.</p>
+    </section>
+
+    <section class="sec" id="sheet">
+      <div class="sec-head">
+        <p class="eyebrow">표정·포즈 발주</p>
+        <h2>일러스트 발주 체크리스트</h2>
+        <p class="lead">풀이 화면은 문장마다 표정이 바뀌는 대화형이라 표정 바리에이션이 많이 필요하다. 아래는 MVP 기준 최소 세트다.</p>
+      </div>
+      <div class="sheet-grid">
+        <div class="block">
+          <h3>공통 표정 (인물당 10종)</h3>
+          <div class="chips"><span class="chip">기본</span><span class="chip">미소</span><span class="chip">크게 웃음</span><span class="chip">진지</span><span class="chip">걱정</span><span class="chip">당황</span><span class="chip">놀람</span><span class="chip">삐짐</span><span class="chip">감동</span><span class="chip">생각 중</span></div>
+        </div>
+        <div class="block">
+          <h3>서휘 전용 동작</h3>
+          <div class="chips"><span class="chip h">안경 올리기</span><span class="chip h">팔짱</span><span class="chip h">만년필로 계산</span><span class="chip h">시계 보기</span><span class="chip h">몰래 양갱</span></div>
+        </div>
+        <div class="block">
+          <h3>하연 전용 동작</h3>
+          <div class="chips"><span class="chip y">부채로 입 가리기</span><span class="chip y">찻잔 내밀기</span><span class="chip y">윙크</span><span class="chip y">"쉿" 손가락 (잠금 화면용)</span><span class="chip y">턱 괴기</span></div>
+        </div>
+        <div class="block">
+          <h3>발주 규격</h3>
+          <ul class="list">
+            <li>상반신 스탠딩: 투명 배경 PNG, 표정 파츠 분리</li>
+            <li>SD(꼬마) 버전: 오늘의 운세, 알림용 각 6종</li>
+            <li>투샷 키비주얼: 랜딩, SNS 공유 카드용</li>
+            <li>배경: 1층 찻집, 2층 서재 각 낮·밤</li>
+            <li>고양이 「입춘」 3포즈</li>
+          </ul>
+          <p class="note">생성형 AI로 제작하는 경우 AI 생성물 표시가 필요하다 (기획서의 법·윤리 체크 참고).</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="rules">
+      <div class="sec-head">
+        <p class="eyebrow">운영 규칙</p>
+        <h2>캐릭터가 지키는 것, 절대 하지 않는 것</h2>
+      </div>
+      <div class="rules">
+        <div class="rule-box">
+          <h3>항상 지키는 것</h3>
+          <ul>
+            <li>풀이에는 반드시 원국의 근거(오행, 십신, 운의 흐름)를 함께 말한다</li>
+            <li>좋지 않은 흐름을 말할 때는 대응 방법을 같이 말한다</li>
+            <li>캐릭터끼리 의견이 달라도 손님을 탓하지 않는다</li>
+            <li>손님이 말한 고민을 기억하고 다음 방문 때 이어서 묻는다 (구독자)</li>
+            <li>캐릭터 설정(나이, 이력, 일간)을 바꾸지 않는다. 바꿀 때는 이 문서를 먼저 고친다</li>
+          </ul>
+        </div>
+        <div class="rule-box no">
+          <h3>절대 하지 않는 것</h3>
+          <ul>
+            <li>손님의 외모나 체형을 평가하는 말</li>
+            <li>이별, 이혼, 퇴사를 단정적으로 권하는 말</li>
+            <li>사망, 질병, 사고를 예언하는 말</li>
+            <li>특정 종목 매수나 투자 금액을 권하는 말</li>
+            <li>실존 인물(연예인, 정치인)의 사주를 풀이하는 콘텐츠</li>
+            <li>구독하지 않으면 불운이 온다는 식의 겁주기</li>
+            <li>다른 손님의 정보를 언급하는 말</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="hooks">
+      <div class="sec-head">
+        <p class="eyebrow">스토리 떡밥</p>
+        <h2>구독자 연재 「휘연당 영업일지」에 쓸 소재</h2>
+        <p class="lead">한 번에 풀지 않고 시즌마다 하나씩 공개한다. 공개 순서는 구독자 반응을 보고 정한다.</p>
+      </div>
+      <ul class="hooks">
+        <li><b>봉인된 원국</b><div>할머니의 장부 마지막 장에 이름 없이 적힌 사주 한 장. 휘는 계산을 끝냈지만 연에게 말하지 않고 있다.<span>메인 떡밥. 시즌 피날레용</span></div></li>
+        <li><b>휘의 시계</b><div>휘가 늘 차고 있는 낡은 시계는 누구 것인가. 휘가 출생 시각에 집착하는 이유와 연결된다.<span>휘 중심 에피소드</span></div></li>
+        <li><b>할머니의 말</b><div>할머니가 연에게만 남긴 "사람은 너가 더 잘 읽는다"는 말의 진짜 뜻.<span>연 중심 에피소드</span></div></li>
+        <li><b>고양이 입춘</b><div>입춘날 가게 앞에 나타난 고양이. 휘는 "입춘이 절기 기준 새해라서"라며 이름을 지었다.<span>가벼운 일상 에피소드, 시즌 이벤트(입춘)와 연동</span></div></li>
+        <li><b>매운 떡볶이 사건</b><div>휘가 연에게 매운 떡볶이를 먹인 날의 이야기.<span>팬서비스용 단편</span></div></li>
+      </ul>
+    </section>
+
+    <footer>휘연당 캐릭터 설정서 · 초안 v0.1 · 2026-10-08. 일간 성향 해석은 명리학의 일반적 해석을 캐릭터 설정에 빌려온 것이다. 캐릭터의 생일을 공개하려면 만세력 엔진으로 계산해서 설정 일간(휘 경금, 연 계수)과 일치하는 날짜를 고른다.</footer>
+  </main>
+</div>

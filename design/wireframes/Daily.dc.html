@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>오늘의 운세 산통</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&amp;family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2B3560}a:hover{color:#1C2340}
+@keyframes shake{0%,100%{transform:rotate(0)}15%{transform:rotate(-14deg)}30%{transform:rotate(12deg)}45%{transform:rotate(-10deg)}60%{transform:rotate(8deg)}75%{transform:rotate(-5deg)}}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 1000px; box-sizing: border-box; background: #F5F0E4; color: #1C2340; font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 10px 20px; background: #161C36; color: #F5F0E4;">
+    <div style="display: flex; flex-direction: column;">
+      <span style="font-family: 'Song Myung', serif; font-size: 21px; color: #E8CD8C;">휘연당</span>
+      <span style="font-size: 12px; color: #C9CCDA;">10월 9일 · 또 왔네, 지우야</span>
+    </div>
+    <a href="Stickers.dc.html" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 99px; border: 1px solid #4E5888; color: #E8CD8C; text-decoration: none; font-size: 12.5px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 13.5c1 1.4 2.2 2 3.5 2s2.5-.6 3.5-2"></path></svg>
+      스티커 7/24
+    </a>
+  </header>
+
+  <section style="background-color: #161C36; background-image: radial-gradient(circle at 12% 30%, rgba(232, 205, 140, 0.9) 0 1.2px, transparent 2px), radial-gradient(circle at 88% 20%, rgba(232, 205, 140, 0.7) 0 1px, transparent 2px), radial-gradient(ellipse at 50% 80%, #33427A 0%, #161C36 70%); color: #F5F0E4; padding: 6px 20px 26px; border-radius: 0 0 28px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; min-height: 380px; box-sizing: border-box;">
+
+    <sc-if value="{{ notDone }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; align-items: flex-end; gap: 8px; margin-top: 8px;">
+        <img src="../assets/characters/hwi-poses/23-plead.webp" alt="두 손을 모은 서휘" style="width: 120px; height: 120px; filter: drop-shadow(0 0 18px rgba(232, 205, 140, 0.45));">
+        <div style="{{ tubeStyle }}">
+          <svg width="96" height="170" viewBox="0 0 96 170" aria-label="산통">
+            <g stroke="#C8A24C" stroke-width="4" stroke-linecap="round"><path d="M30 60 L24 6"></path><path d="M42 60 L40 2"></path><path d="M54 60 L58 8"></path><path d="M66 60 L74 14"></path></g>
+            <rect x="14" y="52" width="68" height="112" rx="10" fill="#232B4D" stroke="#C8A24C" stroke-width="2"></rect>
+            <rect x="14" y="70" width="68" height="6" fill="#C8A24C"></rect>
+            <rect x="14" y="140" width="68" height="6" fill="#C8A24C"></rect>
+            <text x="48" y="118" text-anchor="middle" font-family="Song Myung, serif" font-size="26" fill="#E8CD8C">運</text>
+          </svg>
+        </div>
+      </div>
+      <p style="margin: 0; font-family: 'Song Myung', serif; font-size: 21px; text-align: center; line-height: 1.4;">{{ prompt }}</p>
+      <button type="button" onClick="{{ shake }}" style="{{ shakeBtnStyle }}">{{ shakeLabel }}</button>
+    </sc-if>
+
+    <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; animation: rise 0.5s ease-out;">
+        <span style="font-size: 12px; letter-spacing: 0.16em; color: #E8CD8C;">오늘 뽑힌 운</span>
+        <div style="position: relative;">
+          <img src="../assets/characters/hwi-poses/09-gold.webp" alt="금덩이를 안은 서휘" style="width: 190px; height: 190px; filter: drop-shadow(0 0 26px rgba(232, 205, 140, 0.6));">
+          <span style="position: absolute; right: -16px; top: 10px; width: 58px; height: 58px; border-radius: 50%; border: 2px solid #E8CD8C; background: #232B4D; color: #E8CD8C; font-family: 'Song Myung', serif; font-size: 26px; display: flex; align-items: center; justify-content: center; transform: rotate(8deg);">吉</span>
+        </div>
+        <h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: 26px;">재물이 보이는 날</h2>
+        <p style="margin: 0; font-size: 14.5px; color: #E1E3EC; text-align: center; line-height: 1.6;">휘 · 들어오는 건 좋은데, 오늘은 지출 기록부터 해. 어디로 새는지 보이는 날이야.</p>
+      </div>
+    </sc-if>
+  </section>
+
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 18px 20px; flex-grow: 1;">
+    <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+      <section style="display: flex; flex-direction: column; gap: 10px; border-radius: 18px; background: #FFFCF5; border: 1px solid #E2D9C4; padding: 14px 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <b style="font-size: 14.5px;">분야별 오늘 지수</b>
+          <span style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #F3E3BC; color: #6A4A0E;">예시 값</span>
+        </div>
+        <sc-for list="{{ meters }}" as="m" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: 40px 64px minmax(0, 1fr); gap: 10px; align-items: center;">
+            <img src="{{ m.src }}" alt="" style="width: 40px; height: 40px;">
+            <span style="font-size: 13.5px; font-weight: 600;">{{ m.label }}</span>
+            <div style="display: flex; gap: 5px;">
+              <sc-for list="{{ m.dots }}" as="d" hint-placeholder-count="5">
+                <span style="{{ d.style }}"></span>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <p style="margin: 0; font-size: 12px; color: #5B6178; line-height: 1.55;">흔들기는 연출이에요. 결과는 오늘 일진과 내 일간(갑목)의 십신 관계로 계산했어요. 같은 날 다시 흔들어도 결과는 같아요.</p>
+      </section>
+    </sc-if>
+
+    <section style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span style="font-size: 14px; font-weight: 700;">연속 출석 3일째</span>
+        <span style="font-size: 12px; color: #5B6178;">7일 채우면 스티커 「만세 휘」</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px;">
+        <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+          <div style="{{ d.cellStyle }}">{{ d.label }}</div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+      <a href="#" style="display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 14px; background: #FFFCF5; border: 1px solid #E2D9C4; color: #1C2340; text-decoration: none;"><img src="../assets/characters/hwi-poses/12-thread.webp" alt="" style="width: 46px; height: 46px;"><span style="display: flex; flex-direction: column;"><b style="font-size: 14px;">궁합 보기</b><span style="font-size: 12px; color: #5B6178;">붉은 실 찾기</span></span></a>
+      <a href="#" style="display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 14px; background: #FFFCF5; border: 1px solid #E2D9C4; color: #1C2340; text-decoration: none;"><img src="../assets/characters/hwi-poses/17-calendar.webp" alt="" style="width: 46px; height: 46px;"><span style="display: flex; flex-direction: column;"><b style="font-size: 14px;">2027 신년운세</b><span style="font-size: 12px; color: #5B6178;">월별 흐름</span></span></a>
+    </section>
+  </main>
+
+  <nav aria-label="하단 메뉴" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #E2D9C4; background: #FFFCF5;">
+    <a href="Daily.dc.html" style="height: 60px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; color: #1C2340; text-decoration: none;">홈</a>
+    <a href="Reading.dc.html" style="height: 60px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; color: #5B6178; text-decoration: none;">내 풀이</a>
+    <a href="Stickers.dc.html" style="height: 60px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; color: #5B6178; text-decoration: none;">스티커</a>
+    <a href="Cancel.dc.html" style="height: 60px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; color: #5B6178; text-decoration: none;">마이</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'idle' };
+  }
+  componentWillUnmount() {
+    clearTimeout(this.t);
+  }
+  renderVals() {
+    const phase = this.state.phase;
+    const shaking = phase === 'shaking';
+    const meter = (label, src, n) => ({
+      label, src,
+      dots: [1, 2, 3, 4, 5].map((k) => ({ style: 'width: 18px; height: 18px; border-radius: 50%; ' + (k <= n ? 'background: #D4AF5A;' : 'background: #EDE5D2;') }))
+    });
+    const days = [];
+    for (let i = 1; i <= 7; i++) {
+      const on = i <= 3;
+      days.push({ label: String(i), cellStyle: 'height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; ' + (on ? 'background: #D4AF5A; color: #161C36; font-weight: 700;' : 'background: #FFFCF5; color: #5B6178; border: 1px solid #E2D9C4;') });
+    }
+    return {
+      notDone: phase !== 'done',
+      done: phase === 'done',
+      prompt: shaking ? '달그락 달그락…' : '오늘 운, 같이 뽑아볼까?',
+      tubeStyle: 'transform-origin: 50% 90%; ' + (shaking ? 'animation: shake 0.6s ease-in-out 2;' : ''),
+      shakeLabel: shaking ? '뽑는 중…' : '산통 흔들기',
+      shakeBtnStyle: 'height: 54px; width: 100%; border-radius: 14px; border: 0; font: inherit; font-size: 16.5px; font-weight: 700; cursor: pointer; ' + (shaking ? 'background: #8A7A50; color: #F5F0E4;' : 'background: #D4AF5A; color: #161C36;'),
+      shake: () => {
+        if (this.state.phase !== 'idle') return;
+        this.setState({ phase: 'shaking' });
+        this.t = setTimeout(() => this.setState({ phase: 'done' }), 1300);
+      },
+      meters: [
+        meter('재물', '../assets/characters/hwi-poses/09-gold.webp', 4),
+        meter('연애', '../assets/characters/hwi-poses/11-heart.webp', 3),
+        meter('일', '../assets/characters/hwi-poses/13-career.webp', 3),
+        meter('공부', '../assets/characters/hwi-poses/15-diploma.webp', 2),
+        meter('이동', '../assets/characters/hwi-poses/18-travel.webp', 2)
+      ],
+      days
+    };
+  }
+}
+</script>
+</body>
+</html>

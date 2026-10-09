@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>사주 계산 중</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&amp;family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2B3560}a:hover{color:#1C2340}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(.92);opacity:.6}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background-color: #161C36; background-image: radial-gradient(circle at 14% 18%, rgba(232, 205, 140, 0.9) 0 1.2px, transparent 2px), radial-gradient(circle at 82% 26%, rgba(232, 205, 140, 0.7) 0 1px, transparent 2px), radial-gradient(circle at 30% 76%, rgba(232, 205, 140, 0.6) 0 1px, transparent 2px), radial-gradient(circle at 88% 70%, rgba(232, 205, 140, 0.8) 0 1.2px, transparent 2px), radial-gradient(ellipse at 50% 42%, #33427A 0%, #161C36 66%); color: #F5F0E4; font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 70px 24px 32px; gap: 26px; overflow: hidden;">
+  <span style="font-size: 12px; letter-spacing: 0.18em; color: #E8CD8C;">만세력 펼치는 중</span>
+
+  <div style="position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;">
+    <div style="position: absolute; inset: 0; border: 1px dashed rgba(200, 162, 76, 0.5); border-radius: 50%; animation: orbit 14s linear infinite;">
+      <span style="position: absolute; left: 50%; top: -14px; margin-left: -14px; width: 28px; height: 28px; border-radius: 50%; background: #3F7D4E; color: #F5F0E4; font-family: 'Song Myung', serif; font-size: 15px; display: flex; align-items: center; justify-content: center;">木</span>
+      <span style="position: absolute; right: 2px; top: 92px; width: 28px; height: 28px; border-radius: 50%; background: #C2412F; color: #F5F0E4; font-family: 'Song Myung', serif; font-size: 15px; display: flex; align-items: center; justify-content: center;">火</span>
+      <span style="position: absolute; right: 44px; bottom: 10px; width: 28px; height: 28px; border-radius: 50%; background: #B08A2E; color: #F5F0E4; font-family: 'Song Myung', serif; font-size: 15px; display: flex; align-items: center; justify-content: center;">土</span>
+      <span style="position: absolute; left: 44px; bottom: 10px; width: 28px; height: 28px; border-radius: 50%; background: #8A8F99; color: #F5F0E4; font-family: 'Song Myung', serif; font-size: 15px; display: flex; align-items: center; justify-content: center;">金</span>
+      <span style="position: absolute; left: 2px; top: 92px; width: 28px; height: 28px; border-radius: 50%; background: #2B5A8C; color: #F5F0E4; font-family: 'Song Myung', serif; font-size: 15px; display: flex; align-items: center; justify-content: center;">水</span>
+    </div>
+    <img src="{{ pose }}" alt="{{ poseAlt }}" style="width: 220px; height: 220px; filter: drop-shadow(0 0 30px rgba(232, 205, 140, 0.5)); animation: pop 0.4s ease-out;">
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-height: 92px;">
+    <p style="margin: 0; font-family: 'Song Myung', serif; font-size: 22px; line-height: 1.35;">{{ headline }}</p>
+    <p style="margin: 0; font-size: 13.5px; color: #C9CCDA; line-height: 1.6; max-width: 300px;">{{ detail }}</p>
+  </div>
+
+  <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+    <div style="height: 6px; border-radius: 3px; background: #2E3760; overflow: hidden;"><div style="{{ barStyle }}"></div></div>
+    <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #C9CCDA;">
+      <span>시간대 확인</span><span>연주</span><span>월주</span><span>일주·시주</span><span>완료</span>
+    </div>
+  </div>
+
+  <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+    <a href="Card.dc.html" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 56px; border-radius: 14px; background: #D4AF5A; color: #161C36; text-decoration: none; font-size: 16.5px; font-weight: 700;">내 일간 카드 보기</a>
+  </sc-if>
+  <sc-if value="{{ working }}" hint-placeholder-val="{{ true }}">
+    <button type="button" onClick="{{ skip }}" style="height: 44px; padding: 0 18px; border-radius: 99px; border: 1px solid #4E5888; background: transparent; color: #C9CCDA; font: inherit; font-size: 13.5px; cursor: pointer;">빨리 보기</button>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: 0 };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      if (this.state.step >= 4) { clearInterval(this.timer); return; }
+      this.setState({ step: this.state.step + 1 });
+    }, 1400);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const steps = [
+      { pose: '../assets/characters/hwi-poses/07-meditate.webp', alt: '명상하는 서휘', headline: '태어난 시각을 맞추는 중', detail: '그 해의 시간대와 서머타임을 확인하고 있어요. 서머타임 기간(예: 1987~88년 여름)에 태어났다면 여기서 한 시간이 달라져요.' },
+      { pose: '../assets/characters/hwi-poses/05-write.webp', alt: '붓으로 적는 서휘', headline: '입춘 시각 찾는 중', detail: '사주의 한 해는 1월 1일이 아니라 입춘에 시작해요. 연주를 세우는 중.' },
+      { pose: '../assets/characters/hwi-poses/06-magnify.webp', alt: '돋보기를 든 서휘', headline: '절입 시각 확인 중', detail: '달은 음력이 아니라 절기로 바뀌어요. 월주를 세우는 중.' },
+      { pose: '../assets/characters/hwi-poses/08-orb.webp', alt: '태극 구슬을 든 서휘', headline: '일주와 시주 계산 중', detail: '태어난 곳의 실제 태양 시간으로 보정하고 있어요.' },
+      { pose: '../assets/characters/hwi-poses/02-thumbsup.webp', alt: '엄지를 든 서휘', headline: '다 됐어. 여덟 글자 나왔다', detail: '네 일간부터 보여줄게.' }
+    ];
+    const i = Math.min(this.state.step, 4);
+    const s = steps[i];
+    return {
+      pose: s.pose,
+      poseAlt: s.alt,
+      headline: s.headline,
+      detail: s.detail,
+      barStyle: 'height: 6px; border-radius: 3px; background: #D4AF5A; transition: width 0.6s ease; width: ' + (i * 25) + '%;',
+      done: i === 4,
+      working: i < 4,
+      skip: () => { clearInterval(this.timer); this.setState({ step: 4 }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

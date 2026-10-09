@@ -1,0 +1,32 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-08T12:00:00Z"},
+  "title": "휘연당 화면 설계",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 900, "title": "1. 랜딩", "is_interactive": true},
+    "Input.dc.html": {"x": 470, "y": 0, "w": 390, "h": 1000, "title": "2. 생년월일시 입력", "is_interactive": true},
+    "Loading.dc.html": {"x": 940, "y": 0, "w": 390, "h": 844, "title": "3. 계산 중 (로딩)", "is_interactive": true},
+    "Card.dc.html": {"x": 1410, "y": 0, "w": 390, "h": 844, "title": "4. 일간 캐릭터 카드", "is_interactive": true},
+    "Reading.dc.html": {"x": 1880, "y": 0, "w": 390, "h": 844, "title": "5. 미니 풀이 (캐릭터 연출)", "is_interactive": true},
+    "Paywall.dc.html": {"x": 2350, "y": 0, "w": 390, "h": 1040, "title": "6. 플랜 선택·결제", "is_interactive": true},
+    "Daily.dc.html": {"x": 2820, "y": 0, "w": 390, "h": 1000, "title": "7. 오늘의 운세 (산통 흔들기)", "is_interactive": true},
+    "Stickers.dc.html": {"x": 3290, "y": 0, "w": 390, "h": 1000, "title": "8. 휘연당 스티커 도감", "is_interactive": true},
+    "Cancel.dc.html": {"x": 3760, "y": 0, "w": 390, "h": 844, "title": "9. 구독 관리·해지", "is_interactive": true}
+  },
+  "order": ["Main.dc.html", "Input.dc.html", "Loading.dc.html", "Card.dc.html", "Reading.dc.html", "Paywall.dc.html", "Daily.dc.html", "Stickers.dc.html", "Cancel.dc.html"],
+  "notes": {
+    "flowTitle": {"x": 0, "y": -300, "text": "휘연당 모바일 화면 흐름", "kind": "title1", "maxW": 4150},
+    "n1": {"x": 0, "y": 1180, "w": 390, "text": "랜딩: 두 사람이 보름달 안에서 손님을 맞는다. 궁금한 주제를 휘의 포즈 6개로 고르게 해서 첫 클릭을 쉽게 만든다.", "fill": "gray"},
+    "n2": {"x": 470, "y": 1180, "w": 390, "text": "입력: 성별은 대운 방향 계산용, 출생 지역은 진태양시 보정용. '시간을 몰라요'를 누르면 휘가 머리를 긁으며 삼주로 보겠다고 답한다. 개인정보 동의는 미리 체크하지 않는다.", "fill": "gray"},
+    "n3": {"x": 940, "y": 1180, "w": 390, "text": "로딩: 기다리는 시간을 연출로 바꾼다. 문구는 엔진이 실제로 하는 단계(입춘·절기·진태양시)만 쓴다.", "fill": "teal"},
+    "n4": {"x": 1410, "y": 1180, "w": 390, "text": "카드: SNS 공유용. 일간과 오행 수치는 예시이고, 실제로는 엔진 계산값이 들어간다.", "fill": "gray"},
+    "n5": {"x": 1880, "y": 1180, "w": 390, "text": "미니 풀이: 대사마다 휘의 포즈가 바뀐다(설명, 손가락, 팔짱, 웃음, 숨기). 말하는 쪽이 커지고 듣는 쪽은 반응 포즈로 작아진다.", "fill": "gray"},
+    "n6": {"x": 2350, "y": 1180, "w": 390, "text": "결제: 플랜을 미리 선택하지 않는다. 자동결제 조건은 결제 버튼 바로 위. 결제하면 휘가 깃발을 흔드는 완료 화면.", "fill": "orange"},
+    "n7": {"x": 2820, "y": 1180, "w": 390, "text": "산통 흔들기: 결과는 랜덤이 아니라 오늘 일진과 내 일간의 관계로 계산한 값이다. 흔들기는 보여주는 연출일 뿐이고, 화면에도 그렇게 적는다.", "fill": "teal"},
+    "n8": {"x": 3290, "y": 1180, "w": 390, "text": "스티커 도감: 출석, 첫 궁합, 공유 등으로 휘 스티커 24종을 모은다. 재방문 장치. 결제로만 열리는 스티커는 두지 않는다.", "fill": "teal"},
+    "n9": {"x": 3760, "y": 1180, "w": 390, "text": "해지: 2단계. 우는 포즈 같은 죄책감 유도 연출은 쓰지 않고, 인사하는 포즈로 배웅한다.", "fill": "orange"}
+  },
+  "designSystems": []
+}

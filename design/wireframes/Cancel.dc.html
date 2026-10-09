@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>구독 관리</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&amp;family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2B3560}a:hover{color:#1C2340}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F5F0E4; color: #1C2340; font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #161C36; color: #F5F0E4;">
+    <a href="Daily.dc.html" aria-label="뒤로" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #F5F0E4;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+    </a>
+    <span style="font-size: 16px; font-weight: 600;">마이 · 구독 관리</span>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+    <section style="border-radius: 18px; background: #FFFCF5; border: 1px solid #E2D9C4; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 12px; color: #5B6178;">이용 중인 플랜</span>
+      <span style="font-family: 'Song Myung', serif; font-size: 22px;">단골손님 · 월 7,900원</span>
+      <dl style="margin: 0; display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 6px 12px; font-size: 14px;">
+        <dt style="color: #5B6178;">다음 결제일</dt><dd style="margin: 0;">[다음 결제일]</dd>
+        <dt style="color: #5B6178;">결제 수단</dt><dd style="margin: 0;">[카드사] ****-1234</dd>
+        <dt style="color: #5B6178;">1:1 질문</dt><dd style="margin: 0;">이번 달 3회 남음</dd>
+      </dl>
+      <a href="#" style="font-size: 13px;">결제 내역 보기</a>
+    </section>
+
+    <sc-if value="{{ isIdle }}" hint-placeholder-val="{{ true }}">
+      <button type="button" onClick="{{ toConfirm }}" style="height: 52px; border-radius: 14px; border: 1px solid #232B4D; background: #FFFCF5; font: inherit; font-size: 15px; color: #232B4D; cursor: pointer;">구독 해지</button>
+    </sc-if>
+
+    <sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ false }}">
+      <section style="display: flex; flex-direction: column; gap: 14px; border-radius: 18px; border: 1.5px solid #232B4D; padding: 18px; background: #FFFCF5;">
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <img src="../assets/characters/hwi-poses/21-serious.webp" alt="팔짱 낀 서휘" style="width: 56px; height: 56px; flex-shrink: 0;">
+          <p style="margin: 0; padding: 9px 13px; border-radius: 4px 14px 14px 14px; background: #E6E8F1; font-size: 14px; line-height: 1.6;">알겠어. 해지해도 [다음 결제일] 전까지는 지금처럼 볼 수 있어.</p>
+        </div>
+        <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px;">
+          <legend style="font-size: 13px; font-weight: 600; padding: 0; margin-bottom: 6px;">해지 이유 <span style="font-weight: 400; color: #5B6178;">(선택, 안 골라도 해지돼요)</span></legend>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px;"><input type="radio" name="why" id="why-1"> 가격이 부담돼요</label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px;"><input type="radio" name="why" id="why-2"> 자주 안 쓰게 돼요</label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px;"><input type="radio" name="why" id="why-3"> 풀이가 기대와 달라요</label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px;"><input type="radio" name="why" id="why-4"> 기타</label>
+        </fieldset>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+          <button type="button" onClick="{{ toIdle }}" style="height: 50px; border-radius: 14px; border: 1px solid #232B4D; background: #FFFCF5; font: inherit; font-size: 15px; color: #232B4D; cursor: pointer;">계속 이용하기</button>
+          <button type="button" onClick="{{ toDone }}" style="height: 50px; border-radius: 14px; border: 0; background: #232B4D; font: inherit; font-size: 15px; font-weight: 600; color: #F5F0E4; cursor: pointer;">해지 확정</button>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <section style="display: flex; flex-direction: column; gap: 12px; border-radius: 18px; background: #E1EEEC; padding: 18px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <img src="../assets/characters/hwi-poses/01-greet.webp" alt="인사하는 서휘" style="width: 84px; height: 84px; flex-shrink: 0;">
+          <b style="font-size: 16px; color: #1F4E4C;">해지됐어요.<br>그동안 고마웠어.</b>
+        </div>
+        <p style="margin: 0; font-size: 14px; line-height: 1.6;">[다음 결제일]부터 자동결제가 되지 않아요. 그전까지는 구독 혜택을 그대로 쓸 수 있어요.</p>
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <img src="../assets/characters/yeon/yeon-face.webp" alt="하연" style="width: 48px; height: 48px; flex-shrink: 0;">
+          <p style="margin: 0; padding: 9px 13px; border-radius: 4px 14px 14px 14px; background: #FFFCF5; font-size: 14px; line-height: 1.6;">오늘의 운세는 계속 무료예요. 차 마시러 또 와요~</p>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: 'idle' };
+  }
+  renderVals() {
+    const s = this.state.step;
+    return {
+      isIdle: s === 'idle',
+      isConfirm: s === 'confirm',
+      isDone: s === 'done',
+      toConfirm: () => this.setState({ step: 'confirm' }),
+      toIdle: () => this.setState({ step: 'idle' }),
+      toDone: () => this.setState({ step: 'done' })
+    };
+  }
+}
+</script>
+</body>
+</html>

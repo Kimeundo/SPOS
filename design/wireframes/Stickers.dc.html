@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>휘연당 스티커 도감</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&amp;family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2B3560}a:hover{color:#1C2340}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1000px; box-sizing: border-box; background: #F5F0E4; color: #1C2340; font-family: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif; display: flex; flex-direction: column; overflow: hidden;">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #161C36; color: #F5F0E4;">
+    <a href="Daily.dc.html" aria-label="뒤로" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #F5F0E4;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+    </a>
+    <span style="font-size: 16px; font-weight: 600; flex-grow: 1;">휘 스티커 도감</span>
+  </header>
+
+  <section style="background: #161C36; color: #F5F0E4; padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; border-radius: 0 0 24px 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <span style="font-family: 'Song Myung', serif; font-size: 24px;">{{ countLabel }}</span>
+      <span style="font-size: 12.5px; color: #E8CD8C;">다 모으면 하연이 비밀 이야기를 해줘요</span>
+    </div>
+    <div style="height: 8px; border-radius: 4px; background: #2E3760; overflow: hidden;"><div style="{{ barStyle }}"></div></div>
+    <span style="font-size: 12px; color: #C9CCDA;">출석, 풀이, 궁합, 공유로 모아요. 결제해야만 받는 스티커는 없어요.</span>
+  </section>
+
+  <main style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 6px; padding: 16px 14px;">
+    <sc-for list="{{ stickers }}" as="s" hint-placeholder-count="24">
+      <button type="button" onClick="{{ s.open }}" style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 0; border: 0; background: transparent; font: inherit; color: #1C2340; cursor: pointer;">
+        <span style="position: relative; display: block; width: 76px; height: 76px;">
+          <img src="{{ s.src }}" alt="{{ s.name }}" style="{{ s.imgStyle }}">
+          <sc-if value="{{ s.locked }}" hint-placeholder-val="{{ false }}">
+            <span style="position: absolute; right: 0; bottom: 0; width: 24px; height: 24px; border-radius: 50%; background: #232B4D; color: #E8CD8C; display: flex; align-items: center; justify-content: center;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            </span>
+          </sc-if>
+        </span>
+        <span style="{{ s.nameStyle }}">{{ s.name }}</span>
+      </button>
+    </sc-for>
+  </main>
+
+  <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 4; background: rgba(22, 28, 54, 0.55); display: flex; align-items: flex-end;">
+      <div style="width: 100%; box-sizing: border-box; background: #FFFCF5; border-radius: 26px 26px 0 0; padding: 22px 22px 26px; display: flex; flex-direction: column; align-items: center; gap: 10px; animation: up 0.3s ease-out;">
+        <img src="{{ selSrc }}" alt="{{ selName }}" style="{{ selImgStyle }}">
+        <h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: 24px;">{{ selName }}</h2>
+        <span style="{{ selBadgeStyle }}">{{ selStatus }}</span>
+        <p style="margin: 0; font-size: 14px; color: #5B6178; text-align: center; line-height: 1.6;">{{ selHow }}</p>
+        <button type="button" onClick="{{ close }}" style="margin-top: 6px; width: 100%; height: 50px; border-radius: 14px; border: 1px solid #232B4D; background: #FFFCF5; font: inherit; font-size: 15px; color: #232B4D; cursor: pointer;">닫기</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: null };
+  }
+  renderVals() {
+    const B = '/_blob/';
+    const list = [
+      ['99a6a3b33c62e0766d8d8cb7fc0b351b', '인사하는 휘', '휘연당에 처음 들르면', true],
+      ['2b454c118b0e5fe7c99636207513fa92', '엄지 척 휘', '첫 풀이를 끝까지 보면', true],
+      ['513af5bcfe5868006f7aea0fb7b64c48', '설명하는 휘', '미니 풀이 대사를 전부 들으면', true],
+      ['703e8388bb8d6ac573031f3d978ae31a', '안내하는 휘', '가입하면', true],
+      ['bfb070695bcf526d48f79f955eb92c26', '기록하는 휘', '3일 연속 출석하면', true],
+      ['517f3fcabe770258a625a8955c1b6779', '돋보기 휘', '출생 시각을 분까지 입력하면', true],
+      ['7aa93f2df2188776841807d531330dd6', '명상하는 휘', '만세력 계산을 처음 기다리면', true],
+      ['7e71166e97b5abb9adb8a05a7e94de0d', '태극 구슬 휘', '일간 카드를 친구에게 공유하면', false],
+      ['6961da6f363a2f57f06031dca0d00c0e', '금덩이 휘', '재물운이 좋은 날 산통을 흔들면', false],
+      ['1f12ef158f523f380d5c4161bd4af239', '복주머니 휘', '설날 무렵에 들르면', false],
+      ['c408c4eeb2bb442768bcc429302134a2', '하트 휘', '연애운 풀이를 보면', false],
+      ['d7fe34f713581f9f7e1e6cc90922dbd7', '붉은 실 휘', '처음으로 궁합을 보면', false],
+      ['f95533dad64461708d2986b63a1ee4dc', '출근하는 휘', '일·이직 풀이를 보면', false],
+      ['73bf0eb787004fd029dd1f389ff22b6c', '깃발 휘', '친구를 초대하면', false],
+      ['9f4ab1ee95a79ea39be1840b5d1f9c7c', '합격 휘', '시험운 풀이를 보면', false],
+      ['e32f64fea325755a10e7053e9e675fe1', '만세 휘', '7일 연속 출석하면', false],
+      ['8ea96ea7e59a8909c2e2e618ba81c04e', '달력 휘', '좋은 날 찾기를 써보면', false],
+      ['bb6dd50aa6297272389b701e759520f8', '길 떠나는 휘', '이동운 풀이를 보면', false],
+      ['7f8ff7d3243f9e9f76f51f9775361662', '머리 긁는 휘', '"시간을 몰라요"를 골라본 적이 있으면', false],
+      ['4454b9195df2a1948e6e5ef602239d5c', '비 맞은 휘', '2주 만에 다시 돌아오면', false],
+      ['7e9a1e251c04dd6169a00eda3112be02', '팔짱 낀 휘', '휘의 "할 일" 대사를 5번 들으면', false],
+      ['8826fdf646a1112f460e83afabb5418d', '웃음 터진 휘', '하연의 장난 대사를 전부 보면', false],
+      ['9623d69cac40b0394a28dd981ffd8c2a', '부탁하는 휘', '신년운세 시즌에 들르면', false],
+      ['2af96e6d505134d72eed59e212ead399', '숨은 휘', '??? (숨겨진 조건)', false]
+    ];
+    const got = list.filter((x) => x[3]).length;
+    const selIdx = this.state.sel;
+    const sel = selIdx === null ? null : list[selIdx];
+    return {
+      countLabel: got + ' / ' + list.length + ' 모음',
+      barStyle: 'height: 8px; border-radius: 4px; background: #D4AF5A; width: ' + Math.round(got / list.length * 100) + '%;',
+      stickers: list.map((x, i) => ({
+        src: B + x[0], name: x[1], locked: !x[3],
+        imgStyle: 'width: 76px; height: 76px; ' + (x[3] ? '' : 'filter: grayscale(1) brightness(1.05); opacity: 0.35;'),
+        nameStyle: 'font-size: 11.5px; text-align: center; line-height: 1.3; ' + (x[3] ? 'color: #1C2340; font-weight: 600;' : 'color: #8A8F99;'),
+        open: () => this.setState({ sel: i })
+      })),
+      hasSel: !!sel,
+      selSrc: sel ? B + sel[0] : '',
+      selName: sel ? sel[1] : '',
+      selImgStyle: 'width: 180px; height: 180px; ' + (sel && !sel[3] ? 'filter: grayscale(1); opacity: 0.4;' : ''),
+      selStatus: sel ? (sel[3] ? '모았어요' : '아직 못 모았어요') : '',
+      selBadgeStyle: 'font-size: 12px; padding: 3px 10px; border-radius: 99px; ' + (sel && sel[3] ? 'background: #E1EEEC; color: #1F4E4C;' : 'background: #EDE5D2; color: #5B6178;'),
+      selHow: sel ? '얻는 방법 · ' + sel[2] : '',
+      close: () => this.setState({ sel: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

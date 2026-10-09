@@ -1,0 +1,46 @@
+/* 휘연당 디자인 토큰 (화면 설계 시안에서 쓴 값) */
+@import url("https://fonts.googleapis.com/css2?family=Song+Myung&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap");
+
+:root {
+  /* 바탕 */
+  --hy-night: #161C36;        /* 밤하늘 배경, 헤더 */
+  --hy-night-glow: #33427A;   /* 밤하늘 중심 그라데이션 */
+  --hy-navy: #232B4D;         /* 서휘 색, 어두운 카드 */
+  --hy-paper: #F5F0E4;        /* 기본 화면 바탕 */
+  --hy-sheet: #FFFCF5;        /* 카드, 입력칸 */
+  --hy-line: #E2D9C4;         /* 테두리 */
+  --hy-line-strong: #D8CDB4;
+
+  /* 글자 */
+  --hy-ink: #1C2340;
+  --hy-ink-soft: #5B6178;
+  --hy-on-night: #F5F0E4;
+  --hy-on-night-soft: #C9CCDA;
+
+  /* 포인트 */
+  --hy-gold: #D4AF5A;         /* 주요 버튼 (글자는 --hy-night) */
+  --hy-gold-line: #C8A24C;    /* 금색 테두리, 별자리 선 */
+  --hy-gold-text: #E8CD8C;    /* 밤하늘 위 금색 글자 */
+  --hy-teal: #2C6866;         /* 하연 색 */
+
+  /* 말풍선 */
+  --hy-bubble-hwi: #E6E8F1;
+  --hy-bubble-yeon: #E1EEEC;
+
+  /* 오행 */
+  --hy-wood: #3F7D4E;
+  --hy-fire: #C2412F;
+  --hy-earth: #B08A2E;
+  --hy-metal: #8A8F99;
+  --hy-water: #2B5A8C;
+
+  /* 글꼴 */
+  --hy-font-display: "Song Myung", "Nanum Myeongjo", serif;
+  --hy-font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+  /* 모양 */
+  --hy-radius-btn: 14px;
+  --hy-radius-card: 18px;
+  --hy-btn-height: 56px;
+  --hy-moon-glow: drop-shadow(0 0 22px rgba(232, 205, 140, 0.5));
+}
