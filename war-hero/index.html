@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<!--ARTIFACT-START-->
+<title>전쟁히어로</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* 레이아웃: 화면 전체가 위성 전장(canvas). 그 위에 상단 HUD · 우측 작전 패널(모바일은 하단 시트) · 표적 카드가 뜬다. 단일 야간 테마. */
+:root{
+  --night:#05080a;
+  --panel:rgba(8,13,15,.84);
+  --panel-solid:#0b1215;
+  --raise:rgba(255,255,255,.05);
+  --line:rgba(190,224,212,.14);
+  --line-strong:rgba(190,224,212,.28);
+  --text:#e8f1ed;
+  --muted:#8ea39b;
+  --dim:#5d6f69;
+  --hero:#ffc23d;
+  --hero-ink:#1c1300;
+  --alert:#ff4b5c;
+  --ok:#2ee59d;
+  --f-display:"Black Han Sans","Noto Sans KR","Apple SD Gothic Neo",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-num:"Chakra Petch","IBM Plex Sans KR",ui-monospace,monospace;
+  --gut:max(16px, env(safe-area-inset-left, 0px));
+  --gut-r:max(16px, env(safe-area-inset-right, 0px));
+  --top:env(safe-area-inset-top, 0px);
+  --bot:env(safe-area-inset-bottom, 0px);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--night);color:var(--text);font-family:var(--f-body);-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--hero);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+#app{position:fixed;inset:0;overflow:hidden;user-select:none;-webkit-user-select:none}
+#map{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block;cursor:grab}
+#map.dragging{cursor:grabbing}
+#alertfx{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 0 transparent;transition:box-shadow .25s}
+#alertfx.on{box-shadow:inset 0 0 140px 30px rgba(255,40,60,.45)}
+
+/* ── HUD ───────────────────────────── */
+#hud{position:absolute;left:0;right:0;top:0;padding:calc(var(--top) + 12px) var(--gut-r) 12px var(--gut);display:flex;align-items:center;gap:14px;pointer-events:none;background:linear-gradient(180deg,rgba(3,6,8,.85),rgba(3,6,8,0))}
+#hud > *{pointer-events:auto}
+.brand{display:flex;flex-direction:column;line-height:1}
+.brand b{font-family:var(--f-display);font-weight:400;font-size:26px;letter-spacing:.02em;color:var(--hero);text-shadow:0 2px 0 #000,0 0 18px rgba(255,194,61,.35)}
+.brand span{font-size:10px;letter-spacing:.24em;color:var(--muted);margin-top:4px;text-transform:uppercase}
+.stagechip{display:flex;flex-direction:column;gap:2px;padding:6px 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);min-width:0}
+.stagechip small{font-size:10px;letter-spacing:.18em;color:var(--hero)}
+.stagechip strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:flex;gap:6px;margin-left:auto}
+.stat{display:flex;flex-direction:column;align-items:flex-end;padding:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;min-width:92px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.stat label{font-size:10px;color:var(--muted);letter-spacing:.12em}
+.stat .num{font-size:19px;font-weight:700;line-height:1.1}
+.stat .rate{font-size:10px;color:var(--ok);font-family:var(--f-num)}
+.stat.hero .num{color:var(--hero)}
+.iconbtn{width:38px;height:38px;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font-size:15px}
+.iconbtn svg{width:18px;height:18px;stroke:var(--text);fill:none;stroke-width:2}
+
+/* ── 작전 패널 ─────────────────────── */
+#side{position:absolute;right:var(--gut-r);top:calc(var(--top) + 84px);bottom:calc(var(--bot) + 16px);width:330px;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:hidden}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;padding:12px 0 10px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--hero)}
+.tabbody{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.sect-h{font-size:11px;letter-spacing:.18em;color:var(--muted);display:flex;justify-content:space-between;align-items:baseline}
+.sect-h em{font-style:normal;color:var(--dim);letter-spacing:0;font-size:11px}
+.fac{display:grid;grid-template-columns:18px 1fr auto;gap:4px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.fac:last-child{border-bottom:0}
+.fac .rk{font-family:var(--f-num);font-size:13px;color:var(--muted);text-align:center}
+.fac .nm{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;min-width:0}
+.fac .nm i{width:10px;height:10px;border-radius:2px;flex:none}
+.fac .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fac .pc{font-family:var(--f-num);font-weight:700;font-size:14px}
+.fac .bar{grid-column:2 / 4;height:4px;background:var(--raise);border-radius:2px;overflow:hidden}
+.fac .bar b{display:block;height:100%;border-radius:2px;transition:width .5s}
+.fac .meta{grid-column:2 / 4;font-size:11px;color:var(--muted);display:flex;gap:10px}
+.fac.me .nm span{color:var(--hero)}
+.fac.dead{opacity:.4}
+.fac.dead .nm span{text-decoration:line-through}
+.note{font-size:12px;color:var(--muted);line-height:1.6}
+.rankrow{display:grid;grid-template-columns:26px 1fr auto;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--line);align-items:center}
+.rankrow .rk{font-family:var(--f-num);font-weight:700;color:var(--muted);text-align:center}
+.rankrow:nth-child(-n+3) .rk{color:var(--hero)}
+.rankrow .who{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rankrow .sub{grid-column:2;font-size:11px;color:var(--muted)}
+.rankrow .sc{font-family:var(--f-num);font-weight:700;grid-row:1 / 3;grid-column:3}
+.rankrow.me{background:linear-gradient(90deg,rgba(255,194,61,.12),transparent)}
+.seg{display:flex;gap:4px;padding:3px;background:var(--raise);border-radius:7px}
+.seg button{flex:1;border:0;background:none;padding:7px;border-radius:5px;font-size:12px;color:var(--muted);font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--panel-solid);color:var(--text)}
+.upg{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;align-items:center}
+.upg b{font-size:14px}
+.upg small{grid-column:1;font-size:11px;color:var(--muted)}
+.upg button{grid-row:1 / 3;grid-column:2}
+.btn{border:1px solid var(--line-strong);background:var(--raise);border-radius:6px;padding:9px 12px;font-weight:700;font-size:13px;white-space:nowrap}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.hero{background:var(--hero);border-color:var(--hero);color:var(--hero-ink)}
+.btn.alert{background:var(--alert);border-color:var(--alert);color:#fff}
+.btn .num{font-size:12px}
+.log{font-size:12px;line-height:1.5;display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.log time{font-family:var(--f-num);color:var(--dim);flex:none}
+.log i{font-style:normal;font-weight:700}
+.medal{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.medal .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:14px;background:var(--raise);color:var(--dim);flex:none}
+.medal.got .ic{background:var(--hero);color:var(--hero-ink)}
+.medal b{font-size:13px;display:block}
+.medal small{font-size:11px;color:var(--muted)}
+
+/* ── 표적 카드 ─────────────────────── */
+#target{position:absolute;left:var(--gut);bottom:calc(var(--bot) + 16px);width:min(380px,calc(100% - 32px));background:var(--panel);border:1px solid var(--line-strong);border-radius:10px;padding:14px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;flex-direction:column;gap:10px;animation:rise .18s ease-out}
+@keyframes rise{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.t-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.t-head h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:24px;line-height:1.1}
+.t-head .own{font-size:12px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:6px}
+.t-head .own i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.t-close{background:none;border:0;color:var(--muted);font-size:22px;line-height:1;padding:0 4px}
+.t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.t-grid div{background:var(--raise);border-radius:6px;padding:7px 9px}
+.t-grid label{font-size:10px;color:var(--muted);letter-spacing:.08em;display:block}
+.t-grid .num{font-size:16px;font-weight:700}
+.odds{display:flex;align-items:center;gap:10px}
+.odds .meter{flex:1;height:8px;background:var(--raise);border-radius:4px;overflow:hidden}
+.odds .meter b{display:block;height:100%;background:var(--ok);transition:width .15s,background .15s}
+.odds .num{font-size:18px;font-weight:700;min-width:54px;text-align:right}
+.commit{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.commit input{flex:1;accent-color:var(--hero)}
+.commit .num{color:var(--text);font-size:14px;min-width:74px;text-align:right}
+.t-actions{display:grid;grid-template-columns:1fr auto auto;gap:6px}
+.t-actions .btn.hero{font-size:15px;padding:12px}
+.t-why{font-size:12px;color:var(--muted)}
+
+/* ── 연출 ─────────────────────────── */
+#banner{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0}
+#banner.show{animation:bang 1.9s cubic-bezier(.2,.9,.2,1) forwards}
+#banner small{display:block;font-size:13px;letter-spacing:.4em;color:var(--hero);font-weight:700}
+#banner b{display:block;font-family:var(--f-display);font-weight:400;font-size:clamp(34px,7vw,64px);line-height:1.05;color:#fff;text-shadow:0 3px 0 #000,0 0 30px rgba(255,194,61,.6);white-space:nowrap}
+#banner span{display:block;font-family:var(--f-num);font-size:16px;color:var(--ok);margin-top:6px;font-weight:700}
+#banner.bad b{text-shadow:0 3px 0 #000,0 0 30px rgba(255,60,80,.7)}
+#banner.bad small{color:var(--alert)}
+@keyframes bang{0%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}12%{opacity:1;transform:translate(-50%,-50%) scale(.96)}20%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+#combo{position:absolute;left:var(--gut);top:calc(var(--top) + 86px);font-family:var(--f-display);font-size:34px;color:var(--hero);text-shadow:0 2px 0 #000;pointer-events:none;opacity:0}
+#combo.show{animation:pop .9s ease-out forwards}
+@keyframes pop{0%{opacity:0;transform:scale(1.8)}15%{opacity:1;transform:scale(1)}70%{opacity:1}100%{opacity:0}}
+#ticker{position:absolute;left:var(--gut);top:calc(var(--top) + 84px);display:flex;flex-direction:column;gap:5px;pointer-events:none;max-width:min(420px,calc(100% - 32px))}
+#ticker div{font-size:12px;padding:6px 10px;background:var(--panel);border-left:3px solid var(--c,var(--muted));border-radius:0 6px 6px 0;animation:slidein .25s ease-out;line-height:1.4}
+#ticker div.out{transition:opacity .5s;opacity:0}
+@keyframes slidein{from{transform:translateX(-12px);opacity:0}to{transform:none;opacity:1}}
+#toasts{position:absolute;left:50%;top:calc(var(--top) + 84px);transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{display:flex;gap:10px;align-items:center;background:var(--panel-solid);border:1px solid var(--hero);border-radius:8px;padding:8px 14px;animation:rise .25s ease-out;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast .ic{width:26px;height:26px;border-radius:50%;background:var(--hero);color:var(--hero-ink);display:grid;place-items:center;font-family:var(--f-display);font-size:13px}
+.toast b{font-size:13px;display:block}
+.toast small{font-size:11px;color:var(--muted)}
+#attrib{position:absolute;left:var(--gut);bottom:calc(var(--bot) + 2px);font-size:9px;color:rgba(232,241,237,.5);pointer-events:none;text-shadow:0 1px 2px #000}
+
+/* ── 오버레이 ─────────────────────── */
+.overlay{position:absolute;inset:0;display:grid;place-items:center;padding:calc(var(--top) + 16px) var(--gut-r) calc(var(--bot) + 16px) var(--gut);background:radial-gradient(ellipse at 50% 40%,rgba(5,8,10,.35),rgba(5,8,10,.9) 75%);overflow:auto}
+.card{width:min(520px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;padding:26px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.title-big{font-family:var(--f-display);font-weight:400;font-size:clamp(52px,12vw,84px);line-height:.95;margin:0;color:var(--hero);text-shadow:0 4px 0 #000,0 0 40px rgba(255,194,61,.35);letter-spacing:-.01em}
+.kicker{font-size:11px;letter-spacing:.3em;color:var(--muted);font-weight:600}
+.lede{margin:0;font-size:15px;line-height:1.65;color:#cfdcd6}
+.ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.ladder div{padding:8px 6px;border-top:2px solid var(--line-strong);font-size:11px;color:var(--muted)}
+.ladder div b{display:block;font-size:13px;color:var(--text);margin-top:2px}
+.ladder div.on{border-top-color:var(--hero)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600}
+.field input,.field select{width:100%;background:var(--panel-solid);border:1px solid var(--line-strong);border-radius:7px;padding:11px 12px;color:var(--text);font-size:15px;font-family:var(--f-body)}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.go{display:grid;grid-template-columns:1fr auto;gap:8px}
+.go .btn.hero{font-family:var(--f-display);font-weight:400;font-size:22px;padding:14px;letter-spacing:.06em}
+.statsgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.statsgrid div{background:var(--raise);border-radius:8px;padding:10px}
+.statsgrid label{font-size:10px;color:var(--muted);letter-spacing:.1em}
+.statsgrid .num{font-size:20px;font-weight:700;display:block}
+.loading{font-family:var(--f-num);color:var(--muted);letter-spacing:.2em;font-size:13px;text-align:center}
+.loading b{display:block;font-family:var(--f-display);font-weight:400;font-size:42px;color:var(--hero);letter-spacing:0;margin-bottom:10px}
+.progress{height:3px;width:220px;background:var(--raise);margin:14px auto 0;border-radius:2px;overflow:hidden}
+.progress b{display:block;height:100%;width:0;background:var(--hero);transition:width .3s}
+
+/* ── 모바일 ───────────────────────── */
+#sheetToggle{display:none}
+@media (max-width:820px){
+  #hud{flex-wrap:wrap;gap:8px;padding-bottom:6px}
+  .brand b{font-size:21px}
+  .brand span{display:none}
+  .stagechip{flex:1;padding:5px 10px}
+  .stagechip strong{font-size:13px}
+  .stats{order:3;width:100%;margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .stat{min-width:0;padding:5px 8px;align-items:flex-start}
+  .stat .num{font-size:15px}
+  .stat label{font-size:9px}
+  #side{left:0;right:0;top:auto;bottom:0;width:auto;height:min(48vh,420px);border-radius:14px 14px 0 0;border-left:0;border-right:0;border-bottom:0;padding-bottom:var(--bot);transform:translateY(calc(100% - 46px - var(--bot)));transition:transform .28s ease}
+  #side.open{transform:none}
+  .tabbody{padding:12px var(--gut-r) 12px var(--gut)}
+  #target{left:var(--gut);right:var(--gut-r);width:auto;bottom:calc(var(--bot) + 56px)}
+  #ticker{top:calc(var(--top) + 134px)}
+  #ticker div:nth-last-child(n+3){display:none}
+  #toasts{top:calc(var(--top) + 134px)}
+  #combo{top:calc(var(--top) + 170px)}
+  #attrib{bottom:calc(var(--bot) + 48px)}
+  .row3{grid-template-columns:1fr}
+  .card{padding:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  #banner.show,#combo.show{animation-duration:.01s}
+  #side{transition:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="map" aria-label="위성 전장 지도"></canvas>
+  <div id="alertfx"></div>
+  <div id="attrib">위성영상: Sentinel-2 cloudless 2016 © EOX IT Services GmbH (CC BY 4.0, 수정된 Copernicus Sentinel 데이터) · 경계: 통계청 행정동(vuski/admdongkor), Natural Earth</div>
+
+  <header id="hud">
+    <div class="brand"><b>전쟁히어로</b><span>War Hero · Live Conquest</span></div>
+    <div class="stagechip"><small id="stageNo">STAGE 1</small><strong id="stageName">출격 대기</strong></div>
+    <div class="stats">
+      <div class="stat hero"><label>기동 병력</label><span class="num" id="sTroops">0</span><span class="rate" id="sTroopsRate">+0/s</span></div>
+      <div class="stat"><label>군자금</label><span class="num" id="sFunds">0</span><span class="rate" id="sFundsRate">+0/s</span></div>
+      <div class="stat"><label>영토 점유</label><span class="num" id="sShare">0%</span><span class="rate" id="sUnits">0 / 0</span></div>
+      <div class="stat"><label>제패 점수</label><span class="num" id="sScore">0</span><span class="rate" id="sRank">순위 -</span></div>
+    </div>
+    <button class="iconbtn" id="soundBtn" title="소리 켜기/끄기" aria-label="소리 켜기/끄기"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path id="soundWave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+  </header>
+
+  <aside id="side">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="war" aria-selected="true">전황</button>
+      <button role="tab" data-tab="rank" aria-selected="false">랭킹</button>
+      <button role="tab" data-tab="hq" aria-selected="false">사령부</button>
+      <button role="tab" data-tab="log" aria-selected="false">기록</button>
+    </div>
+    <div class="tabbody" id="tabbody"></div>
+  </aside>
+
+  <section id="target" hidden aria-live="polite"></section>
+  <div id="ticker"></div>
+  <div id="toasts"></div>
+  <div id="combo"></div>
+  <div id="banner"><small id="bnSmall">점령 완료</small><b id="bnBig"></b><span id="bnSub"></span></div>
+
+  <div class="overlay" id="loading">
+    <div class="loading"><b>전쟁히어로</b>작전 지도 수신 중<div class="progress"><b id="loadBar"></b></div></div>
+  </div>
+
+  <div class="overlay" id="start" hidden>
+    <form class="card" id="startForm">
+      <div class="kicker">REAL-MAP CONQUEST · 대한민국 → 세계</div>
+      <h1 class="title-big">전쟁히어로</h1>
+      <p class="lede">우리 동네 한 개 동에서 출격합니다. 이웃 동을 하나씩 점령해 구를 장악하고, 시·도를 평정해 대한민국을 통일한 뒤 세계로 나아가세요. 경쟁 세력도 실시간으로 영토를 넓힙니다.</p>
+      <div class="ladder" id="ladder">
+        <div class="on">1단계<b>동 점령전</b></div>
+        <div>2단계<b>시·군·구 평정</b></div>
+        <div>3단계<b>대한민국 통일</b></div>
+        <div>4단계<b>세계 정복</b></div>
+      </div>
+      <div class="field"><label for="callsign">지휘관 콜사인</label><input id="callsign" maxlength="14" placeholder="예: 성수동호랑이" autocomplete="off"></div>
+      <div class="field"><label>출격 지역</label>
+        <div class="row3">
+          <select id="selSido" aria-label="시·도"></select>
+          <select id="selSgg" aria-label="시·군·구"></select>
+          <select id="selDong" aria-label="동"></select>
+        </div>
+      </div>
+      <div class="go">
+        <button type="submit" class="btn hero" id="goBtn">출격</button>
+        <button type="button" class="btn" id="resumeBtn" hidden>이어하기</button>
+      </div>
+      <div class="note">지도를 끌어 이동하고, 휠이나 두 손가락으로 확대합니다. 내 영토와 맞닿은 지역(점선 테두리)을 누르면 공격할 수 있습니다. 같은 지역을 한 번 더 누르면 즉시 공격합니다.</div>
+    </form>
+  </div>
+
+  <div class="overlay" id="clear" hidden>
+    <div class="card">
+      <div class="kicker" id="clKicker">STAGE CLEAR</div>
+      <h2 class="title-big" id="clTitle" style="font-size:clamp(40px,9vw,64px)"></h2>
+      <p class="lede" id="clLede"></p>
+      <div class="statsgrid">
+        <div><label>점령</label><span class="num" id="clCap">0</span></div>
+        <div><label>소요 시간</label><span class="num" id="clTime">0</span></div>
+        <div><label>제패 점수</label><span class="num" id="clScore">0</span></div>
+      </div>
+      <div class="go"><button class="btn hero" id="clNext">다음 전장으로</button><button class="btn" id="clStay">지도 보기</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="game.js"></script>
+<!--ARTIFACT-END-->
+</body>
+</html>
