@@ -268,7 +268,7 @@ const G = {
   running: false, stage: 0, th: null, factions: [], callsign: '', start: null,
   up: { atk: 0, def: 0, eco: 0 }, cd: { strike: 0, mobil: 0 },
   score: 0, stageT: 0, totalT: 0, caps: 0, stageCaps: 0, lost: 0, combo: 0, lastCap: 0,
-  medals: {}, feed: [], selected: null, pendingSave: 0, rates: { troops: 0, funds: 0 },
+  medals: {}, feed: [], selected: null, auto: store.get('auto', true), focus: store.get('focus', false), pendingSave: 0, rates: { troops: 0, funds: 0 },
 };
 const P = () => G.factions[0];
 
@@ -436,8 +436,59 @@ function launch(fi, target, commit) {
   if (target.owner === 0 && !isPlayer) {
     UI.alert();
     pushFeed(`<i style="color:${f.color}">${esc(f.name)}</i>이(가) ${esc(target.name)}을(를) 공격합니다!`, f.color);
+    if (G.auto) autoDefend(target, commit * atkMul(f), o.sea);
   }
   return true;
+}
+
+// 자동 방어: 적 공격이 날아오면 최악의 경우(공격력 ×1.25)도 막을 만큼 기동 병력에서 증원한다
+function autoDefend(target, attPow, sea) {
+  const f = P();
+  const dm = defMul(0) * (sea ? 1.2 : 1);
+  const worst = attPow * 1.25;
+  const def = target.troops * dm;
+  if (worst <= def) {
+    Render.text(target.lx, target.ly, '방어 태세', '#7fd3ff', 14);
+    return;
+  }
+  const add = Math.min(f.pool * 0.6, ((worst - def) / dm) * 1.05);
+  if (add < 1) return;
+  f.pool -= add;
+  target.troops += add;
+  const t0 = now();
+  Render.rings.push({ x: target.lx, y: target.ly, t0, color: '#7fd3ff', r: 60 });
+  Render.rings.push({ x: target.lx, y: target.ly, t0: t0 + 150, color: '#7fd3ff', r: 40 });
+  Render.text(target.lx, target.ly, `증원 +${fmt(add)}`, '#7fd3ff', 17);
+  Sound._tone(520, 0.18, 0.12, 'triangle'); Sound._tone(780, 0.22, 0.12, 'triangle', 0.08);
+  pushFeed(`${esc(target.name)}에 방어군 ${fmt(add)} 증원`, '#7fd3ff');
+}
+
+// 자동 공격: 승률 85% 병력을 맞출 수 있는 가장 효율 좋은 인접 지역을 공격한다
+function playerAuto(dt) {
+  if (!G.auto || !G.running) return;
+  G.autoNext = (G.autoNext || 0) - dt;
+  if (G.autoNext > 0) return;
+  G.autoNext = rand(1.0, 1.8);
+  const f = P();
+  const units = G.th.units;
+  const inflight = Render.strikes.filter((s) => s.fi === 0 && !s.done);
+  if (inflight.length >= 2) return;
+  const busy = new Set(inflight.map((s) => s.target.i));
+  let best = null, bestScore = 0, bestNeed = 0;
+  for (const j of playerFrontier()) {
+    if (busy.has(j)) continue;
+    const t = units[j];
+    const need = neededFor(0, t, 0.85);
+    if (!isFinite(need)) continue;
+    let sc = t.w / (need + 1);
+    if (t.owner < 0) sc *= 1.2;
+    if (t.lostT && now() - t.lostT < 30000) sc *= 3;            // 빼앗긴 땅 탈환 우선
+    if (t.owner > 0 && (G.factions[t.owner].units || 0) <= 2) sc *= 1.5; // 약한 세력 마무리
+    if (sc > bestScore) { bestScore = sc; best = t; bestNeed = need; }
+  }
+  if (!best) return;
+  const usable = f.pool * 0.88;   // 방어용 예비 12%
+  if (usable >= bestNeed) launch(0, best, Math.min(usable, Math.ceil(bestNeed * 1.15)));
 }
 
 function resolve(strike) {
@@ -499,6 +550,7 @@ function onCaptured(fi, prev, target, strike) {
   } else {
     if (prev === 0) {
       G.lost++;
+      target.lostT = now();
       Sound.alert(); buzz(80);
       UI.banner('거점 함락', target.name, `${f.name}에게 빼앗겼습니다`, true);
       pushFeed(`<i style="color:${f.color}">${esc(f.name)}</i>에게 ${esc(target.name)}을(를) 빼앗겼습니다.`, '#ff4b5c');
@@ -594,6 +646,7 @@ function tick(dt) {
     f.units = cnt[i];
   });
   for (let i = 1; i < G.factions.length; i++) aiThink(i, dt, cnt);
+  playerAuto(dt);
   if (now() - G.pendingSave > 8000) save();
 }
 
@@ -634,9 +687,10 @@ const Cam = {
   scale() { return 2 ** (this.z - 8); },
   view() {
     const c = Render.canvas;
-    const side = window.innerWidth > 820 ? 360 : 0;
-    const top = window.innerWidth > 820 ? 80 : 120;
-    const bottom = window.innerWidth > 820 ? 0 : 60;
+    const desk = window.innerWidth > 820;
+    const side = desk && !G.focus ? 360 : 0;
+    const top = G.focus ? (desk ? 70 : 64) : desk ? 80 : 120;
+    const bottom = desk || G.focus ? 0 : 60;
     return { w: c.clientWidth - side, h: c.clientHeight - top - bottom, ox: -side / 2, oy: (top - bottom) / 2 };
   },
   fit(bb, animate) {
@@ -1157,6 +1211,8 @@ const Input = {
       if (e.key === 'Escape') UI.closeTarget();
       if ((e.key === ' ' || e.key === 'Enter') && G.selected && !$('#target').hidden) { e.preventDefault(); UI.fire(); }
       if (e.key === 'h' && Cam.home) Cam.fly(Cam.home.x, Cam.home.y, Cam.home.z, 700);
+      if (e.key === 'f') UI.setFocus(!G.focus);
+      if (e.key === 'a') UI.setAuto(!G.auto);
     });
   },
   tap(x, y) {
@@ -1192,6 +1248,10 @@ const UI = {
     $('#side').addEventListener('pointerdown', hold);
     $('#target').addEventListener('pointerdown', hold);
     $('#soundBtn').addEventListener('click', () => { Sound.init(); Sound.toggle(); this.soundIcon(); });
+    $('#autoBtn').addEventListener('click', () => { Sound.init(); this.setAuto(!G.auto); });
+    $('#focusBtn').addEventListener('click', () => { Sound.init(); this.setFocus(!G.focus); });
+    this.setAuto(G.auto, true);
+    this.setFocus(G.focus, true);
     this.soundIcon();
     $('#tabbody').addEventListener('click', (e) => {
       const b = e.target.closest('button[data-act]');
@@ -1203,7 +1263,34 @@ const UI = {
       if (act === 'goto') { const u = G.th.units[+b.dataset.u]; if (u) { Cam.fly(u.lx, u.ly, Math.max(Cam.z, 8 + Math.log2(260 / Math.max(1, u.bb[2] - u.bb[0]))), 700); G.selected = u; this.openTarget(u); } }
       if (act === 'reset') { store.del('save'); location.reload(); }
       if (act === 'home' && Cam.home) Cam.fly(Cam.home.x, Cam.home.y, Cam.home.z, 700);
+      if (act === 'auto') { this.setAuto(!G.auto); this.dirtyTab = true; this.renderTab(true); }
     });
+  },
+  setAuto(on, quiet) {
+    G.auto = on;
+    store.set('auto', on);
+    const b = $('#autoBtn');
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+    $('#autoLabel').textContent = on ? '자동전투 ON' : '자동전투 OFF';
+    if (!quiet) { Sound.click(); UI.toast(on ? '자동전투 개시' : '수동 지휘', on ? '아군이 스스로 공격하고 공격받으면 증원합니다' : '지역을 눌러 직접 공격하세요'); }
+  },
+  setFocus(on, quiet) {
+    G.focus = on;
+    store.set('focus', on);
+    $('#app').classList.toggle('focus', on);
+    $('#focusBtn').setAttribute('aria-pressed', String(on));
+    $('#focusLabel').textContent = on ? '메뉴 보기' : '전장만 보기';
+    if (on) $('#side').classList.remove('open');
+    if (!quiet) {
+      Sound.click();
+      try {
+        const el = document.documentElement;
+        if (on && !document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
+        if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      } catch { /* 전체화면 미지원 */ }
+      if (G.th) setTimeout(() => Cam.fit(G.th.bbox, true), 60);
+    }
   },
   soundIcon() { $('#soundWave').style.opacity = Sound.on ? 1 : 0.15; },
   hud() {
@@ -1411,6 +1498,8 @@ const UI = {
       ${up('atk', '공격 화력', '공격 병력의 전투력 +12%')}
       ${up('def', '방어 진지', '내 영토 수비력과 수비 상한 +12%')}
       ${up('eco', '군수 생산', '병력·군자금 생산 +15%')}
+      <div class="sect-h">지휘 방식</div>
+      <div class="upg"><b>자동전투 <span class="num" style="color:${G.auto ? 'var(--ok)' : 'var(--muted)'}">${G.auto ? 'ON' : 'OFF'}</span></b><small>아군이 인접 지역을 스스로 공격하고, 적이 공격하면 기동 병력에서 증원합니다 (단축키 A)</small><button class="btn" data-act="auto">${G.auto ? '끄기' : '켜기'}</button></div>
       <div class="sect-h">특수 작전</div>
       <div class="upg"><b>총동원령</b><small>${G.cd.mobil > 0 ? `재사용 ${Math.ceil(G.cd.mobil)}초` : '25초 분량의 병력을 즉시 징집'}</small><button class="btn" data-act="mobil" ${G.cd.mobil > 0 || f.funds < mc ? 'disabled' : ''}><span class="num">${fmtFunds(mc)}</span></button></div>
       <div class="note">정밀 폭격은 지도에서 지역을 선택한 뒤 표적 카드에서 사용합니다. 인접하지 않은 지역도 폭격할 수 있습니다.</div>
