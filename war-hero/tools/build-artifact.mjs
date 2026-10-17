@@ -12,6 +12,8 @@ if (js.includes('</script')) throw new Error('game.js 안에 </script 문자열�
 
 let body = html.split('<!--ARTIFACT-START-->')[1].split('<!--ARTIFACT-END-->')[0];
 body = body.replace('</head>\n<body>\n', '');
+// 아티팩트는 자체 db 랭킹을 쓰므로 Supabase 설정 파일은 넣지 않는다
+body = body.replace('<script src="config.js"></script>\n', '');
 body = body.replace('<script src="game.js"></script>', () => `<script>\n${js}</script>`);
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, body.trim() + '\n');

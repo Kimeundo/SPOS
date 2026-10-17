@@ -1506,13 +1506,14 @@ const UI = {
       const rows = runs.slice(0, 20).map((r, k) => `<div class="rankrow"><span class="rk">${k + 1}</span><span class="who">${esc(r.callsign)}</span><span class="sc">${fmt(r.score)}</span><span class="sub">${esc(r.where)} · ${STAGE_NAMES[r.stage] || ''} 단계 · ${esc(r.date)}</span></div>`).join('');
       return `${seg}<div class="sect-h">이 기기의 명예의 전당</div><div>${rows || '<div class="note">아직 기록이 없습니다. 전장을 클리어하거나 점수를 쌓으면 저장됩니다.</div>'}</div>`;
     }
-    if (!Online.db) {
-      return `${seg}<div class="sect-h">전체 지휘관 랭킹</div><div class="note">온라인 랭킹은 공유 링크에서 로그인한 상태로 열면 표시됩니다. 지금은 이 기기 기록만 저장됩니다.</div>${this.liveLine()}`;
+    if (!Online.backend) {
+      return `${seg}<div class="sect-h">전체 지휘관 랭킹</div><div class="note">온라인 랭킹 서버에 연결되지 않았습니다. 지금은 이 기기 기록만 저장됩니다.</div>${this.liveLine()}`;
     }
     const rows = (this.globalRows || []).map((r, k) => `
       <div class="rankrow ${r.id === Online.uid ? 'me' : ''}"><span class="rk">${k + 1}</span><span class="who">${esc(r.callsign || '무명 지휘관')}</span><span class="sc">${fmt(r.score || 0)}</span>
       <span class="sub">${esc(r.where || '')} 출신 · ${esc(r.stageName || '')}${r.diff ? ' · ' + esc(r.diff) : ''} · 점유 ${Math.round(r.share || 0)}%</span></div>`).join('');
-    return `${seg}<div class="sect-h">전체 지휘관 랭킹 <em>실시간</em></div>${this.liveLine()}<div>${rows || '<div class="note">아직 등록된 지휘관이 없습니다. 첫 지역을 점령하면 랭킹에 오릅니다.</div>'}</div>
+    const live = Online.backend === 'supabase' ? (Online.error ? '연결 재시도 중' : '20초마다 갱신') : '실시간';
+    return `${seg}<div class="sect-h">전체 지휘관 랭킹 <em>${live}</em></div>${this.liveLine()}<div>${rows || '<div class="note">아직 등록된 지휘관이 없습니다. 첫 지역을 점령하면 랭킹에 오릅니다.</div>'}</div>
       ${Online.canWrite === false ? '<div class="note">이 링크는 보기 전용이라 내 점수는 등록되지 않습니다.</div>' : ''}`;
   },
   liveLine() { return Online.peers > 0 ? `<div class="note">지금 ${Online.peers}명의 지휘관이 접속 중</div>` : ''; },
@@ -1639,46 +1640,103 @@ function save() {
 }
 
 // ───────────────────────── 온라인 랭킹 (artifact db) ─────────────────────────
+// 온라인 랭킹 백엔드 두 가지:
+//  · Claude 아티팩트로 열면 아티팩트 db (같은 조직·초대받은 사람끼리)
+//  · 일반 웹사이트로 열면 Supabase (config.js 에 주소·anon 키가 있을 때, 누구나)
+// 둘 다 없으면 이 기기 기록만 남는다.
+const Supa = {
+  cfg: window.WH_CONFIG || {},
+  ok() { return !!(this.cfg.supabaseUrl && this.cfg.supabaseAnonKey); },
+  headers() {
+    const k = this.cfg.supabaseAnonKey;
+    return { apikey: k, Authorization: 'Bearer ' + k, 'Content-Type': 'application/json' };
+  },
+  url(path) { return this.cfg.supabaseUrl.replace(/\/+$/, '') + path; },
+  async top(limit = 50) {
+    const r = await fetch(this.url(`/rest/v1/scores?select=id,callsign,score,stage,stage_name,diff,region,share&order=score.desc&limit=${limit}`), { headers: this.headers() });
+    if (!r.ok) throw new Error('rank ' + r.status);
+    return (await r.json()).map((x) => ({ id: x.id, callsign: x.callsign, score: x.score, stageName: x.stage_name, diff: x.diff, where: x.region, share: x.share }));
+  },
+  async submit(body) {
+    const r = await fetch(this.url('/rest/v1/rpc/submit_score'), { method: 'POST', headers: this.headers(), body: JSON.stringify(body) });
+    if (!r.ok) throw new Error('submit ' + r.status);
+  },
+};
+function playerKey() {
+  let k = store.get('pid', null);
+  if (!k || !k.id || !k.secret) {
+    const hex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, '0')).join('');
+    const h = hex(16);
+    const id = crypto.randomUUID ? crypto.randomUUID() : `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+    k = { id, secret: hex(24) };
+    store.set('pid', k);
+  }
+  return k;
+}
+
 const Online = {
-  db: null, uid: null, canWrite: null, peers: 0, lastSent: 0, lastScore: -1, timer: 0,
+  backend: null, db: null, uid: null, canWrite: null, peers: 0, lastSent: 0, lastScore: -1, timer: 0, pollT: 0,
   async init() {
     const cl = window.claude;
-    if (!cl || typeof cl.use !== 'function') return;
-    try {
-      const [db, user] = await Promise.all([cl.use('db'), cl.use('user')]);
-      if (!db || !user) return;
-      const uid = await user.id();
-      if (!uid) return;
-      this.db = db; this.uid = uid;
-      try { const c = await user.can('data.write'); this.canWrite = c; } catch { /* 알 수 없음 */ }
-      db.collection('rank').orderBy('score', 'desc').limit(30).onSnapshot((snap) => {
-        UI.globalRows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        if (UI.tab === 'rank') { UI.dirtyTab = true; UI.renderTab(); }
-        updateGlobalRank();
-      }, () => { /* 구독 종료: 로컬 랭킹만 사용 */ });
-      UI.dirtyTab = true;
-    } catch { this.db = null; }
-    try {
-      const room = await cl.use('room');
-      if (room) {
-        const count = () => { try { this.peers = room.peers().length; } catch { /* noop */ } };
-        room.onPeers(() => { count(); if (UI.tab === 'rank') { UI.dirtyTab = true; } }, () => {});
-        count();
-        this.room = room;
-      }
-    } catch { /* 접속자 표시 생략 */ }
+    if (cl && typeof cl.use === 'function') {
+      try {
+        const [db, user] = await Promise.all([cl.use('db'), cl.use('user')]);
+        const uid = db && user ? await user.id() : null;
+        if (uid) {
+          this.backend = 'claude'; this.db = db; this.uid = uid;
+          try { this.canWrite = await user.can('data.write'); } catch { /* 알 수 없음 */ }
+          db.collection('rank').orderBy('score', 'desc').limit(30).onSnapshot((snap) => {
+            this.setRows(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+          }, () => { /* 구독 종료: 로컬 랭킹만 사용 */ });
+        }
+      } catch { this.db = null; }
+      try {
+        const room = await cl.use('room');
+        if (room) {
+          const count = () => { try { this.peers = room.peers().length; } catch { /* noop */ } };
+          room.onPeers(() => { count(); if (UI.tab === 'rank') UI.dirtyTab = true; }, () => {});
+          count();
+          this.room = room;
+        }
+      } catch { /* 접속자 표시 생략 */ }
+    }
+    if (!this.backend && Supa.ok()) {
+      this.backend = 'supabase';
+      this.uid = playerKey().id;
+      this.poll();
+      setInterval(() => { if (!document.hidden) this.poll(); }, 20000);
+    }
+    UI.dirtyTab = true;
+  },
+  setRows(rows) {
+    UI.globalRows = rows;
+    if (UI.tab === 'rank') { UI.dirtyTab = true; UI.renderTab(true); }
+    updateGlobalRank();
+  },
+  async poll() {
+    try { this.setRows(await Supa.top()); this.error = false; }
+    catch { this.error = true; if (UI.tab === 'rank') UI.dirtyTab = true; }
   },
   async push() {
-    if (!this.db || !this.uid || this.canWrite === false || !G.th) return;
+    if (!this.backend || this.canWrite === false || !G.th) return;
     if (G.score === this.lastScore) return;
     this.lastScore = G.score;
     this.lastSent = now();
     const units = G.th.units;
-    const share = (units.filter((u) => u.owner === 0).length / units.length) * 100;
+    const share = Math.round((units.filter((u) => u.owner === 0).length / units.length) * 100);
+    const where = `${SIDO_SHORT[G.start.sido]} ${G.start.sggName}`;
+    if (this.backend === 'supabase') {
+      const k = playerKey();
+      try {
+        await Supa.submit({ p_id: k.id, p_secret: k.secret, p_callsign: G.callsign.slice(0, 14), p_score: Math.round(G.score), p_stage: G.stage, p_stage_name: STAGES[G.stage].title, p_diff: D().name, p_region: where, p_share: share });
+        this.poll();
+      } catch { /* 다음 점령 때 다시 보낸다 */ this.lastScore = -1; }
+      return;
+    }
     try {
       await this.db.doc('rank/' + this.uid).set({
         callsign: G.callsign, score: G.score, stage: G.stage, stageName: STAGES[G.stage].title, diff: D().name,
-        where: `${SIDO_SHORT[G.start.sido]} ${G.start.sggName}`, share: Math.round(share), updatedAt: new Date().toISOString(),
+        where, share, updatedAt: new Date().toISOString(),
       });
     } catch (e) {
       if (e && e.code === 'invalid_argument') this.canWrite = false;

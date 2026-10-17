@@ -26,6 +26,15 @@ cd war-hero
 python3 -m http.server 8000   # http://localhost:8000
 ```
 
+### 웹사이트 공개 (GitHub Pages + Supabase 전체 랭킹)
+
+1. [Supabase](https://supabase.com) 무료 프로젝트 생성 → SQL Editor 에 `supabase/schema.sql` 을 붙여 넣고 Run.
+2. Project Settings → API 의 Project URL 과 anon public 키를 `config.js` 에 넣는다.
+3. 저장소 Settings → Pages → Source 를 **GitHub Actions** 로 설정.
+4. `main` 에 반영되면 `.github/workflows/war-hero-pages.yml` 이 https://kimeundo.github.io/SPOS/ 로 배포한다.
+
+랭킹 보안: 누구나 읽을 수 있지만 쓰기는 `submit_score()` 함수로만 가능하고, 처음 등록한 브라우저의 비밀값이 맞아야 갱신된다. 플레이어별 최고 점수만 남는다. 점수 자체를 조작한 요청까지 막지는 못하므로 재미용 랭킹으로 쓴다.
+
 Claude 아티팩트로 배포하면 `db` 기능으로 **전체 지휘관 랭킹**이 공유된다(로그인 + 기여자 이상 권한).
 그 외 호스팅에서는 이 기기 기록(명예의 전당)만 표시된다.
 
