@@ -4,5 +4,5 @@
 // 비워 두면 각 기기 기록만 저장된다.
 window.WH_CONFIG = {
   supabaseUrl: 'https://noclagcxaeizngigraxj.supabase.co',
-  supabaseAnonKey: '',
+  supabaseAnonKey: 'sb_publishable_JGLGUvq54xVxJFfS0Vnzow_6WIWum2o',
 };
