@@ -56,7 +56,7 @@ node tools/build-artifact.mjs ./dist/index.html
 
 - 위성영상: **Sentinel-2 cloudless 2016** by EOX IT Services GmbH — CC BY 4.0 (상업적 이용 가능, 출처 표기 필수).
   2017년 이후 버전은 CC BY-NC-SA(비상업)이므로 교체할 때 주의.
-- 행정동 경계: [vuski/admdongkor](https://github.com/vuski/admdongkor) (통계청 행정동 경계 기반, 2025-01-01 기준).
+- 행정동 경계: 통계청 SGIS 행정동 경계(공공누리 제1유형, 출처표시) → [vuski/admdongkor](https://github.com/vuski/admdongkor) 가공본(CC BY 4.0), 2025-01-01 기준. 상업적 이용 가능, 두 출처 모두 표기 필수.
 - 국가 경계: [Natural Earth](https://www.naturalearthdata.com/) 1:50m — 퍼블릭 도메인.
 
 상용 출시 전 확인할 것: 타일 대량 다운로드가 EOX 서비스 약관에 맞는지, 고해상도가 필요하면 상용 위성 타일(예: MapTiler·Mapbox Satellite) 또는 브이월드 API 라이선스로 교체.

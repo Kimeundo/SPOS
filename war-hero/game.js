@@ -59,6 +59,13 @@ const COUNTRY_SHORT = {
 const WORLD_POWERS = ['USA', 'CHN', 'RUS', 'JPN', 'IND', 'DEU', 'GBR', 'BRA', 'TUR', 'NGA', 'AUS', 'EGY'];
 const COLORS = ['#ff4b5c', '#3d8bff', '#2ee59d', '#b06bff', '#ff8a3d', '#23d5e8', '#ff5fb5', '#a3e635', '#8b9cff', '#f2e3c6', '#00c2a8', '#ff7a7a'];
 const HERO = '#ffc23d';
+// 난이도: AI 생산력·공격성, 중립 수비군, 자동 방어 증원 한도, 점수 배율
+const DIFF = {
+  easy:   { name: '쉬움',  ai: 0.85, aggr: 0.8, neutral: 1.1, defCap: 0.6,  score: 0.8, autoGap: [1.6, 2.6] },
+  normal: { name: '보통',  ai: 1.4,  aggr: 1.15, neutral: 1.7, defCap: 0.45, score: 1.0, autoGap: [2.6, 4.0] },
+  hard:   { name: '어려움', ai: 1.9,  aggr: 1.45, neutral: 2.1, defCap: 0.35, score: 1.4, autoGap: [3.2, 4.8] },
+};
+const D = () => DIFF[G.diff] || DIFF.normal;
 const STAGE_NAMES = ['동', '시·군·구', '시·도', '세계'];
 
 // ───────────────────────── 사운드 (WebAudio 합성) ─────────────────────────
@@ -343,7 +350,7 @@ async function setupStage(stageIdx, restore) {
     player.pool = M * 230;
     player.funds = Math.max(P()?.funds || 0, 60 * st.S);
     G.factions = [player];
-    for (const u of units) u.troops = Math.round(M * 70 * u.w * rand(0.8, 1.2));
+    for (const u of units) u.troops = Math.round(M * 70 * u.w * rand(0.8, 1.2) * D().neutral);
     units[home].owner = 0;
     units[home].troops = Math.round(M * 110 * units[home].w);
     if (stageIdx === 3) {
@@ -378,7 +385,7 @@ async function setupStage(stageIdx, restore) {
   Render.strikes = []; Render.parts = []; Render.texts = []; Render.rings = [];
   Cam.fit(G.th.bbox, !restore);
   if (stageIdx < 3) Data.load(STAGES[stageIdx + 1].file).catch(() => {});
-  $('#stageNo').textContent = `STAGE ${stageIdx + 1} · ${STAGE_NAMES[stageIdx]}`;
+  $('#stageNo').textContent = `STAGE ${stageIdx + 1} · ${STAGE_NAMES[stageIdx]} · ${D().name}`;
   $('#stageName').textContent = stageTitle();
   UI.closeTarget();
   UI.renderTab();
@@ -455,7 +462,7 @@ function autoDefend(target, attPow, sea) {
     Render.text(target.lx, target.ly, '방어 태세', '#7fd3ff', 14);
     return;
   }
-  const add = Math.min(f.pool * 0.6, ((worst - def) / dm) * 1.05);
+  const add = Math.min(f.pool * D().defCap, ((worst - def) / dm) * 1.05);
   if (add < 1) return;
   f.pool -= add;
   target.troops += add;
@@ -472,7 +479,7 @@ function playerAuto(dt) {
   if (!G.auto || !G.running) return;
   G.autoNext = (G.autoNext || 0) - dt;
   if (G.autoNext > 0) return;
-  G.autoNext = rand(1.0, 1.8);
+  G.autoNext = rand(...D().autoGap);
   const f = P();
   const units = G.th.units;
   const inflight = Render.strikes.filter((s) => s.fi === 0 && !s.done);
@@ -532,7 +539,7 @@ function onCaptured(fi, prev, target, strike) {
   const st = STAGES[G.stage];
   const f = G.factions[fi];
   if (fi === 0) {
-    const pts = Math.round(10 * target.w * st.S * (prev > 0 ? 1.5 : 1));
+    const pts = Math.round(10 * target.w * st.S * (prev > 0 ? 1.5 : 1) * D().score);
     const t = gnow();
     G.combo = t - G.lastCap < 7000 ? G.combo + 1 : 1;
     G.lastCap = t;
@@ -640,8 +647,8 @@ function tick(dt) {
   }
   G.factions.forEach((f, i) => {
     if (!f.alive) return;
-    const ai = i === 0 ? 1 : st.aiMul * (1 + G.stageT / 400);
-    const troopRate = st.M * (6 + 4 * sumW[i]) * ecoMul(f) * ai;
+    const ai = i === 0 ? 1 : st.aiMul * D().ai * (1 + G.stageT / 400);
+    const troopRate = st.M * (6 + 2.4 * sumW[i]) * ecoMul(f) * ai;
     const fundRate = (1.2 + 1.1 * sumW[i]) * st.S * ecoMul(f) * (i === 0 ? 1 : 0.5);
     f.pool += troopRate * dt;
     f.funds += fundRate * dt;
@@ -663,7 +670,7 @@ function aiThink(i, dt, cnt) {
   const units = G.th.units;
   const total = units.length;
   const playerShare = (cnt[0] || 0) / total;
-  const aggr = 0.55 + playerShare * 1.4 + Math.min(1, G.stageT / 300) * 0.4;
+  const aggr = (0.55 + playerShare * 1.4 + Math.min(1, G.stageT / 300) * 0.4) * D().aggr;
   const inFlight = new Set(Render.strikes.filter((s) => s.fi === i && !s.done).map((s) => s.target.i));
   let best = null, bestScore = 0;
   const seen = new Set();
@@ -1504,7 +1511,7 @@ const UI = {
     }
     const rows = (this.globalRows || []).map((r, k) => `
       <div class="rankrow ${r.id === Online.uid ? 'me' : ''}"><span class="rk">${k + 1}</span><span class="who">${esc(r.callsign || '무명 지휘관')}</span><span class="sc">${fmt(r.score || 0)}</span>
-      <span class="sub">${esc(r.where || '')} 출신 · ${esc(r.stageName || '')} · 점유 ${Math.round(r.share || 0)}%</span></div>`).join('');
+      <span class="sub">${esc(r.where || '')} 출신 · ${esc(r.stageName || '')}${r.diff ? ' · ' + esc(r.diff) : ''} · 점유 ${Math.round(r.share || 0)}%</span></div>`).join('');
     return `${seg}<div class="sect-h">전체 지휘관 랭킹 <em>실시간</em></div>${this.liveLine()}<div>${rows || '<div class="note">아직 등록된 지휘관이 없습니다. 첫 지역을 점령하면 랭킹에 오릅니다.</div>'}</div>
       ${Online.canWrite === false ? '<div class="note">이 링크는 보기 전용이라 내 점수는 등록되지 않습니다.</div>' : ''}`;
   },
@@ -1573,7 +1580,7 @@ function stageClear() {
   if (!G.running) return;
   G.running = false;
   const st = STAGES[G.stage];
-  G.score += 1000 * st.S;
+  G.score += Math.round(1000 * st.S * D().score);
   medal('s' + (G.stage + 1), MEDALS.find((m) => m[0] === 's' + (G.stage + 1))[1], `${st.title} 완료`);
   Sound.fanfare();
   recordRun();
@@ -1624,7 +1631,7 @@ function save() {
   if (!G.th) return;
   G.pendingSave = now();
   store.set('save', {
-    v: 1, callsign: G.callsign, start: G.start, stage: G.stage, runId: G.runId,
+    v: 1, callsign: G.callsign, start: G.start, stage: G.stage, runId: G.runId, diff: G.diff,
     units: G.th.units.map((u) => [u.owner, Math.round(u.troops)]),
     factions: G.factions, up: G.up, score: G.score, medals: G.medals, totalT: G.totalT, stageT: G.stageT,
     caps: G.caps, stageCaps: G.stageCaps, lost: G.lost, cleared: !G.running && !G.defeated,
@@ -1670,7 +1677,7 @@ const Online = {
     const share = (units.filter((u) => u.owner === 0).length / units.length) * 100;
     try {
       await this.db.doc('rank/' + this.uid).set({
-        callsign: G.callsign, score: G.score, stage: G.stage, stageName: STAGES[G.stage].title,
+        callsign: G.callsign, score: G.score, stage: G.stage, stageName: STAGES[G.stage].title, diff: D().name,
         where: `${SIDO_SHORT[G.start.sido]} ${G.start.sggName}`, share: Math.round(share), updatedAt: new Date().toISOString(),
       });
     } catch (e) {
@@ -1715,6 +1722,10 @@ const Start = {
     fillSgg();
     if (last?.sgg) { selSgg.value = last.sgg; fillDong(); }
     $('#callsign').value = store.get('callsign', '');
+    const seg = $('#diffSeg');
+    const setDiff = (d) => seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.d === d)));
+    setDiff(store.get('diff', 'normal'));
+    seg.addEventListener('click', (e) => { const b = e.target.closest('button[data-d]'); if (b) setDiff(b.dataset.d); });
     const saved = store.get('save', null);
     if (saved && saved.v === 1 && !(saved.cleared && saved.stage >= 3)) {
       $('#resumeBtn').hidden = false;
@@ -1756,6 +1767,8 @@ const Start = {
     G.callsign = cs;
     G.start = { sido, sgg, dong, sidoName, sggName };
     G.runId = Date.now().toString(36);
+    G.diff = document.querySelector('#diffSeg [aria-pressed="true"]')?.dataset.d || 'normal';
+    store.set('diff', G.diff);
     G.up = { atk: 0, def: 0, eco: 0 };
     G.score = 0; G.caps = 0; G.lost = 0; G.totalT = 0; G.medals = {}; G.feed = []; G.defeated = false;
     G.factions = [];
@@ -1764,7 +1777,7 @@ const Start = {
   },
   async resume(s) {
     Sound.init();
-    G.callsign = s.callsign; G.start = s.start; G.runId = s.runId; G.up = s.up; G.score = s.score;
+    G.callsign = s.callsign; G.start = s.start; G.runId = s.runId; G.up = s.up; G.score = s.score; G.diff = s.diff || 'normal';
     G.medals = s.medals || {}; G.totalT = s.totalT || 0; G.caps = s.caps || 0; G.lost = s.lost || 0; G.feed = [];
     $('#start').hidden = true;
     if (s.cleared) { G.factions = s.factions; await setupStage(s.stage + 1); return; }

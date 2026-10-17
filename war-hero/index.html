@@ -95,6 +95,9 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .seg{display:flex;gap:4px;padding:3px;background:var(--raise);border-radius:7px}
 .seg button{flex:1;border:0;background:none;padding:7px;border-radius:5px;font-size:12px;color:var(--muted);font-weight:600}
 .seg button[aria-pressed="true"]{background:var(--panel-solid);color:var(--text)}
+.seg button small{display:block;font-size:10px;font-weight:500;color:var(--muted);margin-top:2px}
+#diffSeg button{font-size:14px;padding:8px 4px}
+#diffSeg button[aria-pressed="true"]{box-shadow:inset 0 0 0 1px var(--hero);color:var(--hero)}
 .upg{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;align-items:center}
 .upg b{font-size:14px}
 .upg small{grid-column:1;font-size:11px;color:var(--muted)}
@@ -160,7 +163,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 #attrib{position:absolute;left:var(--gut);bottom:calc(var(--bot) + 2px);font-size:9px;color:rgba(232,241,237,.5);pointer-events:none;text-shadow:0 1px 2px #000}
 
 /* ── 오버레이 ─────────────────────── */
-.overlay{position:absolute;inset:0;display:grid;place-items:center;padding:calc(var(--top) + 16px) var(--gut-r) calc(var(--bot) + 16px) var(--gut);background:radial-gradient(ellipse at 50% 40%,rgba(5,8,10,.35),rgba(5,8,10,.9) 75%);overflow:auto}
+.overlay{position:absolute;inset:0;z-index:6;display:grid;place-items:center;padding:calc(var(--top) + 16px) var(--gut-r) calc(var(--bot) + 16px) var(--gut);background:radial-gradient(ellipse at 50% 40%,rgba(5,8,10,.35),rgba(5,8,10,.9) 75%);overflow:auto}
 .card{width:min(520px,100%);background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;padding:26px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .title-big{font-family:var(--f-display);font-weight:400;font-size:clamp(52px,12vw,84px);line-height:.95;margin:0;color:var(--hero);text-shadow:0 4px 0 #000,0 0 40px rgba(255,194,61,.35);letter-spacing:-.01em}
 .kicker{font-size:11px;letter-spacing:.3em;color:var(--muted);font-weight:600}
@@ -255,7 +258,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 <div id="app">
   <canvas id="map" aria-label="위성 전장 지도"></canvas>
   <div id="alertfx"></div>
-  <div id="attrib">위성영상: Sentinel-2 cloudless 2016 © EOX IT Services GmbH (CC BY 4.0, 수정된 Copernicus Sentinel 데이터) · 경계: 통계청 행정동(vuski/admdongkor), Natural Earth</div>
+  <div id="attrib">위성영상: Sentinel-2 cloudless 2016 © EOX IT Services GmbH (CC BY 4.0, 수정된 Copernicus Sentinel 데이터) · 경계: 통계청 SGIS 행정동(공공누리 제1유형) · vuski/admdongkor (CC BY 4.0) · Natural Earth</div>
 
   <header id="hud">
     <div class="brand"><b>전쟁히어로</b><span>War Hero · Live Conquest</span></div>
@@ -312,6 +315,13 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
           <select id="selSido" aria-label="시·도"></select>
           <select id="selSgg" aria-label="시·군·구"></select>
           <select id="selDong" aria-label="동"></select>
+        </div>
+      </div>
+      <div class="field"><label>난이도</label>
+        <div class="seg" id="diffSeg" role="group" aria-label="난이도">
+          <button type="button" data-d="easy" aria-pressed="false">쉬움<small>점수 ×0.8</small></button>
+          <button type="button" data-d="normal" aria-pressed="true">보통<small>점수 ×1</small></button>
+          <button type="button" data-d="hard" aria-pressed="false">어려움<small>점수 ×1.4</small></button>
         </div>
       </div>
       <div class="go">
