@@ -9,6 +9,9 @@
 const $ = (s) => document.querySelector(s);
 const WS = 65536;                       // 줌 8 기준 세계 픽셀 크기 (기본 좌표계)
 const now = () => performance.now();
+// 게임 시계: 일시정지 동안은 멈춘다 (연출·전투 타이밍은 모두 이 시계를 쓴다)
+let pausedTotal = 0, pauseAt = 0;
+const gnow = () => (G.paused ? pauseAt : now()) - pausedTotal;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[(Math.random() * arr.length) | 0];
@@ -370,6 +373,7 @@ async function setupStage(stageIdx, restore) {
   G.stageT = restore?.stageT || 0;
   G.stageCaps = restore?.stageCaps || 0;
   G.selected = null;
+  if (G.paused) UI.setPause(false);
   G.running = true;
   Render.strikes = []; Render.parts = []; Render.texts = []; Render.rings = [];
   Cam.fit(G.th.bbox, !restore);
@@ -425,7 +429,7 @@ function launch(fi, target, commit) {
   f.pool -= commit;
   const isPlayer = fi === 0;
   const n = clamp(Math.round(2 + Math.log2(1 + commit / (STAGES[G.stage].M * 40))), 2, isPlayer ? 8 : 4);
-  const t0 = now();
+  const t0 = gnow();
   const from = { x: o.src.lx, y: o.src.ly }, to = { x: target.lx, y: target.ly };
   const missiles = [];
   for (let k = 0; k < n; k++) {
@@ -455,7 +459,7 @@ function autoDefend(target, attPow, sea) {
   if (add < 1) return;
   f.pool -= add;
   target.troops += add;
-  const t0 = now();
+  const t0 = gnow();
   Render.rings.push({ x: target.lx, y: target.ly, t0, color: '#7fd3ff', r: 60 });
   Render.rings.push({ x: target.lx, y: target.ly, t0: t0 + 150, color: '#7fd3ff', r: 40 });
   Render.text(target.lx, target.ly, `증원 +${fmt(add)}`, '#7fd3ff', 17);
@@ -482,7 +486,7 @@ function playerAuto(dt) {
     if (!isFinite(need)) continue;
     let sc = t.w / (need + 1);
     if (t.owner < 0) sc *= 1.2;
-    if (t.lostT && now() - t.lostT < 30000) sc *= 3;            // 빼앗긴 땅 탈환 우선
+    if (t.lostT && gnow() - t.lostT < 30000) sc *= 3;            // 빼앗긴 땅 탈환 우선
     if (t.owner > 0 && (G.factions[t.owner].units || 0) <= 2) sc *= 1.5; // 약한 세력 마무리
     if (sc > bestScore) { bestScore = sc; best = t; bestNeed = need; }
   }
@@ -505,7 +509,7 @@ function resolve(strike) {
     const survivors = (att - def) / atkMul(f);
     target.owner = fi;
     target.troops = Math.max(Math.round(M * 8), Math.round(survivors * 0.85));
-    target.cap0 = now();
+    target.cap0 = gnow();
     target.capColor = f.color;
     target.capX = strike.to.x; target.capY = strike.to.y;
     f.caps++; f.lastCapName = target.name;
@@ -529,7 +533,7 @@ function onCaptured(fi, prev, target, strike) {
   const f = G.factions[fi];
   if (fi === 0) {
     const pts = Math.round(10 * target.w * st.S * (prev > 0 ? 1.5 : 1));
-    const t = now();
+    const t = gnow();
     G.combo = t - G.lastCap < 7000 ? G.combo + 1 : 1;
     G.lastCap = t;
     const bonus = G.combo > 1 ? Math.round(pts * 0.2 * (G.combo - 1)) : 0;
@@ -550,7 +554,7 @@ function onCaptured(fi, prev, target, strike) {
   } else {
     if (prev === 0) {
       G.lost++;
-      target.lostT = now();
+      target.lostT = gnow();
       Sound.alert(); buzz(80);
       UI.banner('거점 함락', target.name, `${f.name}에게 빼앗겼습니다`, true);
       pushFeed(`<i style="color:${f.color}">${esc(f.name)}</i>에게 ${esc(target.name)}을(를) 빼앗겼습니다.`, '#ff4b5c');
@@ -579,18 +583,17 @@ function airstrike(target) {
   if (G.cd.strike > 0 || f.funds < cost || target.owner === 0) return;
   f.funds -= cost;
   G.cd.strike = 10;
-  const t0 = now();
+  const t0 = gnow();
   for (let k = 0; k < 6; k++) {
     const x = target.lx + rand(-1, 1) * (target.bb[2] - target.bb[0]) * 0.18;
     const y = target.ly + rand(-1, 1) * (target.bb[3] - target.bb[1]) * 0.18;
-    Render.bombs.push({ x, y, t: t0 + k * 120 + 380 });
+    Render.bombs.push({ x, y, t: t0 + k * 120 + 380, onHit: k === 5 ? () => {
+      const cut = Math.round(target.troops * 0.42);
+      target.troops -= cut;
+      Render.text(target.lx, target.ly, `-${fmt(cut)}`, '#ff8b96', 24);
+      UI.dirtyTarget = true;
+    } : null });
   }
-  setTimeout(() => {
-    const cut = Math.round(target.troops * 0.42);
-    target.troops -= cut;
-    Render.text(target.lx, target.ly, `-${fmt(cut)}`, '#ff8b96', 24);
-    UI.dirtyTarget = true;
-  }, 900);
   Sound._noise(0.9, 300, 2400, 0.25, 'bandpass');
   pushFeed(`정밀 폭격: ${esc(target.name)} 수비군 타격`, HERO);
   UI.hud();
@@ -622,7 +625,7 @@ function upgrade(k) {
 
 // ───────────────────────── 경제 · AI 틱 ─────────────────────────
 function tick(dt) {
-  if (!G.running) return;
+  if (!G.running || G.paused) return;
   const st = STAGES[G.stage];
   const units = G.th.units;
   G.stageT += dt; G.totalT += dt;
@@ -751,9 +754,9 @@ const Render = {
     window.addEventListener('resize', resize);
     resize();
   },
-  text(x, y, str, color, size = 16) { this.texts.push({ x, y, str, color, size, t0: now() }); },
+  text(x, y, str, color, size = 16) { this.texts.push({ x, y, str, color, size, t0: gnow() }); },
   burst(x, y, color, big = 1) {
-    const t0 = now();
+    const t0 = gnow();
     this.rings.push({ x, y, t0, color, r: 70 * big });
     this.rings.push({ x, y, t0: t0 + 60, color: '#fff', r: 34 * big });
     for (let k = 0; k < 22 * big; k++) {
@@ -775,7 +778,7 @@ const Render = {
     if (this.shake < 0.3) this.shake = 0;
     this.sx = rand(-1, 1) * this.shake; this.sy = rand(-1, 1) * this.shake;
     const s = Cam.scale();
-    const T = now();
+    const T = gnow();
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = '#05080a';
@@ -1060,6 +1063,7 @@ const Render = {
         ctx.beginPath(); ctx.moveTo(p.x, p.y - 260 * (1 - k) - 30); ctx.lineTo(p.x, p.y - 260 * (1 - k)); ctx.stroke();
       } else if (!bm.hit) {
         bm.hit = true;
+        if (bm.onHit) bm.onHit();
         this.burst(bm.x, bm.y, '#ffd34d', 1.2);
         Sound.boom(1.1);
         buzz(30);
@@ -1212,11 +1216,12 @@ const Input = {
       if ((e.key === ' ' || e.key === 'Enter') && G.selected && !$('#target').hidden) { e.preventDefault(); UI.fire(); }
       if (e.key === 'h' && Cam.home) Cam.fly(Cam.home.x, Cam.home.y, Cam.home.z, 700);
       if (e.key === 'f') UI.setFocus(!G.focus);
+      if (e.key === 'p') UI.setPause(!G.paused);
       if (e.key === 'a') UI.setAuto(!G.auto);
     });
   },
   tap(x, y) {
-    if (!G.running) return;
+    if (!G.running || G.paused) return;
     const u = Render.pick(x, y);
     Sound.init();
     if (!u) { UI.closeTarget(); return; }
@@ -1250,6 +1255,8 @@ const UI = {
     $('#soundBtn').addEventListener('click', () => { Sound.init(); Sound.toggle(); this.soundIcon(); });
     $('#autoBtn').addEventListener('click', () => { Sound.init(); this.setAuto(!G.auto); });
     $('#focusBtn').addEventListener('click', () => { Sound.init(); this.setFocus(!G.focus); });
+    $('#pauseBtn').addEventListener('click', () => { Sound.init(); this.setPause(!G.paused); });
+    $('#resumeGame').addEventListener('click', () => this.setPause(false));
     this.setAuto(G.auto, true);
     this.setFocus(G.focus, true);
     this.soundIcon();
@@ -1274,6 +1281,23 @@ const UI = {
     b.setAttribute('aria-pressed', String(on));
     $('#autoLabel').textContent = on ? '자동전투 ON' : '자동전투 OFF';
     if (!quiet) { Sound.click(); UI.toast(on ? '자동전투 개시' : '수동 지휘', on ? '아군이 스스로 공격하고 공격받으면 증원합니다' : '지역을 눌러 직접 공격하세요'); }
+  },
+  setPause(on) {
+    if (!G.running && on) return;
+    if (on === !!G.paused) return;
+    if (on) { pauseAt = now(); G.paused = true; }
+    else { pausedTotal += now() - pauseAt; G.paused = false; }
+    $('#pauseBtn').setAttribute('aria-pressed', String(on));
+    $('#pauseLabel').textContent = on ? '재개' : '일시정지';
+    $('#pauseIcon').innerHTML = on ? '<path d="M7 5l12 7-12 7z"/>' : '<path d="M8 5v14M16 5v14"/>';
+    $('#paused').hidden = !on;
+    if (on) {
+      const units = G.th.units;
+      const mine = units.filter((u) => u.owner === 0).length;
+      $('#psInfo').textContent = `${stageTitle()} · 점유 ${Math.round((mine / units.length) * 100)}% · ${fmtTime(G.stageT)} 경과`;
+      save();
+    }
+    Sound.click();
   },
   setFocus(on, quiet) {
     G.focus = on;
@@ -1380,6 +1404,7 @@ const UI = {
     if (sb) sb.disabled = G.cd.strike > 0 || f.funds < 80 * st.S || u.owner === 0;
   },
   fire() {
+    if (G.paused) return;
     const u = G.selected;
     if (!u || u.owner === 0 || !playerFrontier().has(u.i)) return;
     const f = P();
@@ -1755,6 +1780,7 @@ function loop() {
   const dt = Math.min(0.1, (t - last) / 1000);
   last = t;
   acc += dt;
+  if (G.paused) acc = 0;
   while (acc >= 0.1) { tick(0.1); acc -= 0.1; }
   uiAcc += dt;
   if (uiAcc > 0.25) {
@@ -1767,7 +1793,7 @@ function loop() {
     UI.renderTab();
   }
   if (!G.running && !Cam.anim && !G.th) Cam.x += dt * 4;
-  Render.frame(dt);
+  Render.frame(G.paused ? 0 : dt);
   requestAnimationFrame(loop);
 }
 
